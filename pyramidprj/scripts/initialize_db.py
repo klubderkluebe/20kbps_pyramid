@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 from .. import models
 
 
-LEGACY_HTTPDOCS_DIRECTOR = "/home/jonas/20kbps/httpdocs"
+LEGACY_HTTPDOCS_DIRECTORY = "/home/jonas/20kbps/httpdocs"
 
 
 def squash_whitespace(s):
@@ -32,30 +32,37 @@ def setup_models(dbsession):
     Add or update models / fixtures in the database.
 
     """
-    with open(f"{LEGACY_HTTPDOCS_DIRECTOR}/index2.htm", "r") as f:
+    with open(f"{LEGACY_HTTPDOCS_DIRECTORY}/index2.htm", "r") as f:
         html_doc = f.read()
 
     soup = BeautifulSoup(html_doc, "html.parser")
     r = soup.find_all(lambda t: t.name == "tr" and t.get("valign", "").lower() == "top")  # type: ignore
 
-    records = [
-        {
-            "date": rec.find_all("td")[0].text.strip(),
-            "body": squash_whitespace(rec.find_all("td")[1].decode_contents().strip()),
+    records = []
+    for rec in r:
+        tds = rec.find_all("td")
+        td0, td1 = tds[0], tds[1]
+        asdict = {
+            "date": td0.text.strip(),
+            "body": squash_whitespace(td1.decode_contents().strip()),
             "explicit_height": (
-                int(rec.find_all("td")[0]["height"])
-                if rec.find_all("td")[0].get("height", None)
+                int(td0["height"])
+                if td0.get("height", None)
                 else None
-            )
+            ),
         }
-        for rec in r
-    ]
+
+        if len(td0.find_all(recursive=False)) > 1:
+            asdict["custom_date_section"] = squash_whitespace(td0.decode_contents().strip())
+
+        records.append(asdict)
 
     for rec in records:
         model = models.index_record.IndexRecord(
             date=rec["date"],
             body=rec["body"],
             explicit_height=rec["explicit_height"],
+            custom_date_section=rec.get("custom_date_section", None)
         )
         dbsession.add(model)
 

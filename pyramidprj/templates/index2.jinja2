@@ -149,7 +149,11 @@
                     {% for rec in records %}
                       <tr valign="top">
                         <td nowrap bordercolor="#003366" {% if rec.explicit_height %}height="{{rec.explicit_height}}"{% endif %}>
-                          <strong>{{rec.date}}</strong>
+                          {% if rec.custom_date_section %}
+                            {{rec.custom_date_section|safe}}
+                          {% else %}
+                            <strong>{{rec.date}}</strong>
+                          {% endif %}
                         </td>
                         <td>
                           {{rec.body|safe}}

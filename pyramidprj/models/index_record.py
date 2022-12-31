@@ -13,3 +13,4 @@ class IndexRecord(Base):
     date = Column(Text)
     body = Column(Text)
     explicit_height = Column(Integer)
+    custom_date_section = Column(Text)
