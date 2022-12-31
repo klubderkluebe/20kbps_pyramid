@@ -21,3 +21,4 @@ coverage
 test
 *.sqlite
 node_modules
+pyramidprj.code-workspace
