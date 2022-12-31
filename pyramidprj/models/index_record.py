@@ -12,3 +12,4 @@ class IndexRecord(Base):
     id = Column(Integer, primary_key=True)
     date = Column(Text)
     body = Column(Text)
+    explicit_height = Column(Integer)

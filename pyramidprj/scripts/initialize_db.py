@@ -42,6 +42,11 @@ def setup_models(dbsession):
         {
             "date": rec.find_all("td")[0].text.strip(),
             "body": squash_whitespace(rec.find_all("td")[1].decode_contents().strip()),
+            "explicit_height": (
+                int(rec.find_all("td")[0]["height"])
+                if rec.find_all("td")[0].get("height", None)
+                else None
+            )
         }
         for rec in r
     ]
@@ -50,6 +55,7 @@ def setup_models(dbsession):
         model = models.index_record.IndexRecord(
             date=rec["date"],
             body=rec["body"],
+            explicit_height=rec["explicit_height"],
         )
         dbsession.add(model)
 
