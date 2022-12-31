@@ -17,7 +17,13 @@ def my_view(request):
 
 @view_config(route_name='index2', renderer='pyramidprj:templates/index2.jinja2')
 def index2(request):
-    return dict()
+    try:
+        query = request.dbsession.query(models.IndexRecord)
+        records = query.all()
+    except SQLAlchemyError:
+        return Response(db_err_msg, content_type='text/plain', status=500)
+
+    return {"records": records}
 
 
 db_err_msg = """\
