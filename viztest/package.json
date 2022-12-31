@@ -1,0 +1,15 @@
+{
+  "name": "viztest",
+  "version": "1.0.0",
+  "description": "Visual tests for 20kbps_pyramid",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^29.3.1",
+    "jest-puppeteer": "^6.2.0"
+  }
+}

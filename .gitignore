@@ -20,3 +20,4 @@ Data*.fs*
 coverage
 test
 *.sqlite
+node_modules
