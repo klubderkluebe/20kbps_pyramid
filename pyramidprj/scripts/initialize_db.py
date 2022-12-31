@@ -1,10 +1,30 @@
 import argparse
 import sys
+from string import whitespace
 
 from pyramid.paster import bootstrap, setup_logging
 from sqlalchemy.exc import OperationalError
 
+from bs4 import BeautifulSoup
+
 from .. import models
+
+
+LEGACY_HTTPDOCS_DIRECTOR = "/home/jonas/20kbps/httpdocs"
+
+
+def squash_whitespace(s):
+    t = ""
+    squashing = False
+    for ch in s:
+        if ch in whitespace:
+            if not squashing:
+                t += ch
+                squashing = True
+        else:
+            t += ch
+            squashing = False
+    return t
 
 
 def setup_models(dbsession):
@@ -12,8 +32,26 @@ def setup_models(dbsession):
     Add or update models / fixtures in the database.
 
     """
-    model = models.mymodel.MyModel(name='one', value=1)
-    dbsession.add(model)
+    with open(f"{LEGACY_HTTPDOCS_DIRECTOR}/index2.htm", "r") as f:
+        html_doc = f.read()
+
+    soup = BeautifulSoup(html_doc, "html.parser")
+    r = soup.find_all(lambda t: t.name == "tr" and t.get("valign", "").lower() == "top")  # type: ignore
+
+    records = [
+        {
+            "date": rec.find_all("td")[0].text.strip(),
+            "body": squash_whitespace(rec.find_all("td")[1].decode_contents().strip()),
+        }
+        for rec in r
+    ]
+
+    for rec in records:
+        model = models.index_record.IndexRecord(
+            date=rec["date"],
+            body=rec["body"],
+        )
+        dbsession.add(model)
 
 
 def parse_args(argv):
