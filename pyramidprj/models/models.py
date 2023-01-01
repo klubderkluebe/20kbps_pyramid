@@ -50,7 +50,14 @@ class Release(Base):
 class ReleasePage(Base):
     __tablename__ = "release_page"
     id = Column(Integer, primary_key=True)
-    body = Column(Text)
+
+    content = Column(Text,
+        comment="Page content to be embedded in layout. Imported from pr-text.inc.php."
+    )
+
+    custom_body = Column(Text,
+        comment="Full page content for the release pages that have an index.html."
+    )
 
     release_id = Column(Integer, ForeignKey("release.id"))
     release = relationship("Release", back_populates="release_page")

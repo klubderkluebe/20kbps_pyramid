@@ -78,9 +78,9 @@ def setup_release_pages(dbsession):
         pr_text_file = os.path.join(rlsdir, "pr-text.inc.php")
         index_file = os.path.join(rlsdir, "index.html")        
 
-        body_file = (
-            pr_text_file if os.path.exists(pr_text_file)
-            else index_file
+        is_pr_text, body_file = (
+            (True, pr_text_file) if os.path.exists(pr_text_file)
+            else (False, index_file)
         )
         try:
             with open(body_file, "r", encoding="utf-8") as f:
@@ -90,8 +90,9 @@ def setup_release_pages(dbsession):
                 body = f.read()
 
         model = models.ReleasePage(
-            body=body,
             release=r,
+            content=body if is_pr_text else None,
+            custom_body = body if not is_pr_text else None,
         )
         dbsession.add(model)
     
