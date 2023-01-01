@@ -44,3 +44,26 @@ class Release(Base):
     external_urls = Column(JSON)
 
     index_records = relationship("IndexRecord", secondary=index_record_releases, back_populates="releases")
+    release_page = relationship("ReleasePage", back_populates="release", uselist=False)
+
+
+class ReleasePage(Base):
+    __tablename__ = "release_page"
+    id = Column(Integer, primary_key=True)
+    body = Column(Text)
+
+    release_id = Column(Integer, ForeignKey("release.id"))
+    release = relationship("Release", back_populates="release_page")
+
+    player_files = relationship("PlayerFile", back_populates="release_page")
+
+
+class PlayerFile(Base):
+    __tablename__ = "player_file"
+    id = Column(Integer, primary_key=True)
+    file = Column(Text)
+    title = Column(Text)
+    duration_secs = Column(Integer)
+
+    release_page_id = Column(Integer, ForeignKey("release_page.id"))
+    release_page = relationship("ReleasePage", back_populates="player_files")
