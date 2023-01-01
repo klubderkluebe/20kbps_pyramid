@@ -1,5 +1,5 @@
 import argparse
-import codecs
+import glob
 import os.path
 import re
 import sys
@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 from pyramid.paster import bootstrap, setup_logging
 from sqlalchemy.exc import OperationalError
 
+import mutagen
 from bs4 import BeautifulSoup
 
 from .. import models
@@ -65,6 +66,64 @@ def parse_catalogno(s):
     if s_i.isdigit():
         return int(s_i)
     return None
+
+
+def _get_tracks_by_id3(rlsdir):
+    pattern = os.path.join(LEGACY_HTTPDOCS_DIRECTORY, "Releases", rlsdir, "*.mp3")
+    files = glob.glob(pattern)
+    tracks = []
+    for i, f in enumerate(sorted(files)):
+        mf = mutagen.File(f)  # type: ignore
+        tags = mf.tags  # type: ignore
+        tracks.append({
+            "number": i + 1,
+            "file": f,
+            "title": tags.get("TIT2").text[0],
+            "duration_secs": round(mf.info.length),  # type: ignore
+        })
+    return tracks
+
+
+def setup_player_files(dbsession):
+    ptn_tracksarr = re.compile(r'"tracks" => array\((.*)\);', re.DOTALL)
+    ptn_track = re.compile(r'new track\(.*?"(.*?)".*?,.*?"(.*?)".*?,.*?"(\d*)".*?\)', re.DOTALL)
+
+    query = dbsession.query(models.ReleasePage)
+    pages = query.all()
+    for pg in pages:
+        if pg.custom_body:
+            # Pages imported from index.html don't have players.
+            continue
+
+        with open(f"{LEGACY_HTTPDOCS_DIRECTORY}/Releases/{pg.release.release_dir}/release.php", "r") as f:
+            release_php = f.read()
+
+        m = ptn_tracksarr.search(release_php)
+        if m:                    
+            s_tracksarr = m.groups()[0]  # type: ignore
+            tracks = [
+                {
+                    "number": i + 1,
+                    "file": t[1],
+                    "title": t[0],
+                    "duration_secs": int(t[2]) if t[2] else None,
+                }
+                for i, t in enumerate(ptn_track.findall(s_tracksarr))
+            ]
+        else:
+            tracks = _get_tracks_by_id3(pg.release.release_dir)
+
+        for t in tracks:
+            model = models.PlayerFile(
+                release_page=pg,
+                file=t["file"],
+                number=t["number"],
+                title=t["title"],
+                duration_secs=t["duration_secs"]
+            )
+            dbsession.add(model)
+
+    dbsession.flush()
 
 
 def setup_release_pages(dbsession):
@@ -269,6 +328,7 @@ def setup_models(dbsession):
     setup_index_records(dbsession)
     setup_releases(dbsession)
     setup_release_pages(dbsession)
+    setup_player_files(dbsession)
 
 
 def parse_args(argv):
