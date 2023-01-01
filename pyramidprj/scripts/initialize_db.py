@@ -67,6 +67,37 @@ def parse_catalogno(s):
     return None
 
 
+def setup_release_pages(dbsession):
+    query = dbsession.query(models.Release)
+    releases = query.all()
+    for r in releases:
+        if not r.release_dir:
+            continue
+
+        rlsdir = os.path.join(LEGACY_HTTPDOCS_DIRECTORY, "Releases", r.release_dir)
+        pr_text_file = os.path.join(rlsdir, "pr-text.inc.php")
+        index_file = os.path.join(rlsdir, "index.html")        
+
+        body_file = (
+            pr_text_file if os.path.exists(pr_text_file)
+            else index_file
+        )
+        try:
+            with open(body_file, "r", encoding="utf-8") as f:
+                body = f.read()
+        except UnicodeDecodeError:
+            with open(body_file, "r", encoding="iso-8859-1") as f:
+                body = f.read()
+
+        model = models.ReleasePage(
+            body=body,
+            release=r,
+        )
+        dbsession.add(model)
+    
+    dbsession.flush()
+
+
 def setup_releases(dbsession):
     BODY_20K51 = "sita_-_einige_tracks_fuer_gert_von_heinz-(20k051)-2003"
     FILE_20K281 = "Releases/I_HATE_THIS_ARCHIVE.RAR"
@@ -180,16 +211,18 @@ def setup_releases(dbsession):
             .filter(models.IndexRecord.id.in_(r["index_record_ids"]))
             .all()
         )
-        model = models.models.Release(
+        model = models.Release(
             catalog_no=r["catalog_no"],
             release_dir=r.get("release_dir", None),
             file=r["file"],
             index_records=index_records,
         )
         dbsession.add(model)
+    
+    dbsession.flush()
 
 
-def setup_models(dbsession):
+def setup_index_records(dbsession):
     """
     Add or update models / fixtures in the database.
 
@@ -220,7 +253,7 @@ def setup_models(dbsession):
         records.append(asdict)
 
     for rec in records:
-        model = models.models.IndexRecord(
+        model = models.IndexRecord(
             date=rec["date"],
             body=rec["body"],
             explicit_height=rec["explicit_height"],
@@ -229,7 +262,12 @@ def setup_models(dbsession):
         dbsession.add(model)
 
     dbsession.flush()
+
+
+def setup_models(dbsession):
+    setup_index_records(dbsession)
     setup_releases(dbsession)
+    setup_release_pages(dbsession)
 
 
 def parse_args(argv):
