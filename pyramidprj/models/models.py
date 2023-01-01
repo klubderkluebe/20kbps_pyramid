@@ -69,6 +69,7 @@ class PlayerFile(Base):
     __tablename__ = "player_file"
     id = Column(Integer, primary_key=True)
     file = Column(Text)
+    number = Column(Integer)
     title = Column(Text)
     duration_secs = Column(Integer)
 
