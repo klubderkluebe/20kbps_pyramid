@@ -1,8 +1,8 @@
 """ReleasePage and PlayerFile
 
-Revision ID: 4e08ccdc9d55
+Revision ID: d2c603fd41c4
 Revises: 19d09ecb6c4c
-Create Date: 2023-01-01 11:13:13.624268
+Create Date: 2023-01-01 11:16:42.287661
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '4e08ccdc9d55'
+revision = 'd2c603fd41c4'
 down_revision = '19d09ecb6c4c'
 branch_labels = None
 depends_on = None

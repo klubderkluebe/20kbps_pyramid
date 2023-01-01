@@ -7,7 +7,9 @@ import zope.sqlalchemy
 # ``Base.metadata`` prior to any initialization routines.
 from .models import (
     IndexRecord,
+    PlayerFile,
     Release,
+    ReleasePage,
 )
 
 
