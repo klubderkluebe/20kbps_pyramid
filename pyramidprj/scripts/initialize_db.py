@@ -143,7 +143,8 @@ def _get_release_data(rlsdir):
     m = ptn_release.search(release_php)
     release_assoc_arr = release_php[m.start():m.end()]  # type: ignore
 
-    m = ptn_recomsarr.search(release_assoc_arr)
+    recommendations = None
+    m = ptn_recomsarr.search(release_assoc_arr)    
     if m:
         recommendations_arr = release_assoc_arr[m.start():m.end()]
         recommendations = [
@@ -156,7 +157,11 @@ def _get_release_data(rlsdir):
     if m:
         release_assoc_arr = release_assoc_arr[:m.start()] + release_assoc_arr[m.end() - 2:]
 
-    return read_raw("<?php\n" + release_assoc_arr, "release")
+    data = read_raw("<?php\n" + release_assoc_arr, "release")
+    if recommendations:
+        data["recommendations"] = recommendations
+
+    return data
 
 
 def setup_release_pages(dbsession):
