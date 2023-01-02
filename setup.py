@@ -20,6 +20,10 @@ requires = [
     'SQLAlchemy',
     'transaction',
     'zope.sqlalchemy',
+    "beautifulsoup4",
+    "pyramid_ipython",
+    "mutagen",
+    "php-whisperer",
 ]
 
 tests_require = [
