@@ -41,7 +41,7 @@ class Release(Base):
     catalog_no = Column(Text)
     release_dir = Column(Text)
     file = Column(Text)
-    external_urls = Column(JSON)
+    release_data = Column(JSON)
 
     index_records = relationship("IndexRecord", secondary=index_record_releases, back_populates="releases")
     release_page = relationship("ReleasePage", back_populates="release", uselist=False)
