@@ -1,8 +1,9 @@
 import os.path
 
 import pyramid.httpexceptions as exc
-from pyramid.view import view_config
+from pyramid.renderers import render_to_response
 from pyramid.response import FileResponse, Response
+from pyramid.view import view_config
 from sqlalchemy.exc import SQLAlchemyError
 
 from .. import models
@@ -53,7 +54,7 @@ def Releases(request):
     if release_page.custom_body:
         return Response(body=release_page.custom_body)
     
-    return dict()
+    return render_to_response("pyramidprj:templates/release_page.jinja2", {"release_page": release_page})
 
 
 db_err_msg = """\
