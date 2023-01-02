@@ -17,7 +17,7 @@ from bs4 import BeautifulSoup
 from .. import models
 
 
-LEGACY_HTTPDOCS_DIRECTORY = "/home/jonas/20kbps/httpdocs"
+LEGACY_HTTPDOCS_DIRECTORY = None  # set from settings in main
 
 FILENAME_OVERRIDES = {
     "20k01": "Hakin_Basar_-_Fuck_Fantasy_(20k01)-2002.zip",
@@ -341,9 +341,13 @@ def parse_args(argv):
 
 
 def main(argv=sys.argv):
+    global LEGACY_HTTPDOCS_DIRECTORY
+
     args = parse_args(argv)
     setup_logging(args.config_uri)
     env = bootstrap(args.config_uri)
+
+    LEGACY_HTTPDOCS_DIRECTORY = env["registry"].settings["legacy_httpdocs_directory"]
 
     try:
         with env['request'].tm:
