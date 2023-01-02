@@ -17,7 +17,7 @@ from bs4 import BeautifulSoup
 from .. import models
 
 
-LEGACY_HTTPDOCS_DIRECTORY = None  # set from settings in main
+LEGACY_HTTPDOCS_DIRECTORY = ""  # set from settings in main
 
 FILENAME_OVERRIDES = {
     "20k01": "Hakin_Basar_-_Fuck_Fantasy_(20k01)-2002.zip",
