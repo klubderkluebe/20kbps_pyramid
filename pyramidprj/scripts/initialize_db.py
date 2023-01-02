@@ -271,9 +271,18 @@ def setup_releases(dbsession):
             .filter(models.IndexRecord.id.in_(r["index_record_ids"]))
             .all()
         )
+
+        if "release_dir" in r:
+            release_dir = (
+                r["release_dir"][:-1] if r["release_dir"][-1] == "/"
+                else r["release_dir"]
+            )
+        else:
+            release_dir = None
+
         model = models.Release(
             catalog_no=r["catalog_no"],
-            release_dir=r.get("release_dir", None),
+            release_dir=release_dir,
             file=r["file"],
             index_records=index_records,
         )
