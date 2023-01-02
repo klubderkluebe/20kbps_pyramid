@@ -151,15 +151,11 @@ def _get_release_data(rlsdir):
             for (by, url) in ptn_recom.findall(recommendations_arr)
         ]
         release_assoc_arr = release_assoc_arr[:m.start()] + release_assoc_arr[m.end() - 1:]
-        print(f"recommendations={recommendations}")
 
     m = ptn_tracksarr.search(release_assoc_arr)
     if m:
         release_assoc_arr = release_assoc_arr[:m.start()] + release_assoc_arr[m.end() - 2:]
 
-    print(f"=====({rlsdir})==========")
-    print(release_assoc_arr)
-    print()
     return read_raw("<?php\n" + release_assoc_arr, "release")
 
 
