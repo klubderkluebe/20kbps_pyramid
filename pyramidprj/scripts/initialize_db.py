@@ -13,6 +13,7 @@ from sqlalchemy.exc import OperationalError
 
 import mutagen
 from bs4 import BeautifulSoup
+from php_whisperer import read_raw
 
 from .. import models
 
@@ -126,6 +127,42 @@ def setup_player_files(dbsession):
     dbsession.flush()
 
 
+def _get_release_data(rlsdir):
+    release_php_file = os.path.join(LEGACY_HTTPDOCS_DIRECTORY, "Releases", rlsdir, "release.php")
+    if not os.path.exists(release_php_file):
+        return dict()
+
+    with open(release_php_file, "r") as f:
+        release_php = f.read()
+
+    ptn_release = re.compile(r"\$release = array\(.*?\);", re.DOTALL)
+    ptn_tracksarr = re.compile(r',\s*"tracks" => array\((.*)\);', re.DOTALL)
+    ptn_recomsarr = re.compile(r'"recommendations" => array\(.*?\),\s*"', re.DOTALL)
+    ptn_recom = re.compile(r'new recommendation\("(.*?)",\s*"(.*?)"\)')
+
+    m = ptn_release.search(release_php)
+    release_assoc_arr = release_php[m.start():m.end()]  # type: ignore
+
+    m = ptn_recomsarr.search(release_assoc_arr)
+    if m:
+        recommendations_arr = release_assoc_arr[m.start():m.end()]
+        recommendations = [
+            {"by": by, "url": url}
+            for (by, url) in ptn_recom.findall(recommendations_arr)
+        ]
+        release_assoc_arr = release_assoc_arr[:m.start()] + release_assoc_arr[m.end() - 1:]
+        print(f"recommendations={recommendations}")
+
+    m = ptn_tracksarr.search(release_assoc_arr)
+    if m:
+        release_assoc_arr = release_assoc_arr[:m.start()] + release_assoc_arr[m.end() - 2:]
+
+    print(f"=====({rlsdir})==========")
+    print(release_assoc_arr)
+    print()
+    return read_raw("<?php\n" + release_assoc_arr, "release")
+
+
 def setup_release_pages(dbsession):
     query = dbsession.query(models.Release)
     releases = query.all()
@@ -148,10 +185,12 @@ def setup_release_pages(dbsession):
             with open(body_file, "r", encoding="iso-8859-1") as f:
                 body = f.read()
 
+        r.release_data = _get_release_data(r.release_dir)
+
         model = models.ReleasePage(
             release=r,
             content=body if is_pr_text else None,
-            custom_body = body if not is_pr_text else None,
+            custom_body=body if not is_pr_text else None,
         )
         dbsession.add(model)
     
