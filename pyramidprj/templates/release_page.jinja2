@@ -5,15 +5,15 @@
 		<meta name="twitter:card" content="summary"></meta>
 	<meta name="twitter:site" content="@20kbps"></meta>
 
-  <title>20y20k by VA | 20k373 | </title>
-<meta property="og:title" content="20y20k" />
-	<meta property="og:image" content="https://20kbps.net/Releases/20y20k/cover.jpg" />
-<meta property="og:url" content="https://20kbps.net/Releases/20y20k/" />
+  <title>{{data['relname']}} by {{data['artist']}} | {{data['cat-no']}} | {{data['style']}}</title>
+<meta property="og:title" content="{{data['relname']}}" />
+	<meta property="og:image" content="https://20kbps.net/Releases/{{release.release_dir}}/cover.{{'png' if data['cover-file-type'] == 'png' else 'jpg'}}" />
+<meta property="og:url" content="https://20kbps.net/Releases/{{release.release_dir}}" />
 
-<meta property="og:description" content="VA - 20y20k (20k373)" />
+<meta property="og:description" content="{{data['description']}}" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta name="description" content="VA - 20y20k (20k373)" >
-<meta name="keywords" content="VA - 20y20k (20k373)" itemprop="genre" />
+<meta name="description" content="{{data['description']}}" >
+<meta name="keywords" content="{{data['keywords']}}" itemprop="genre" />
 <link rel="stylesheet"  media="screen" type="text/css" href="../../../css/relpage.css">
 </head>
 
@@ -29,13 +29,13 @@
 </header>
 <div align="center" itemscope itemtype="http://www.schema.org/MusicAlbum">
 
-<h1 itemprop="headline"><span itemprop="name">20y20k</span> <span class="seperator">by</span><span itemprop="byArtist" itemscope itemtype="http://www.schema.org/MusicGroup"><span itemprop="name"> VA</span></span> </h1>
+<h1 itemprop="headline"><span itemprop="name">{{data['relname']}}</span> <span class="seperator">by</span><span itemprop="byArtist" itemscope itemtype="http://www.schema.org/MusicGroup"><span itemprop="name"> {{data['artist']}}</span></span> </h1>
    <div>
 
-	   <img src="cover.jpg" alt="cover image" itemprop="image" class="cover-img"></div>
+	   <img src="cover.cover.{{'png' if data['cover-file-type'] == 'png' else 'jpg'}}" alt="cover image" itemprop="image" class="cover-img"></div>
 	<div>
 		<div class="infotext">
-	<div ><a title="direct download" href="../va_-_20y20k_(20k373)-2022.zip"><img class="icon" src="../../../ico/download.png" alt="download"/></a>
+	<div ><a title="direct download" href="/Releases/{{release.file}}"><img class="icon" src="../../../ico/download.png" alt="download"/></a>
 
 		
 		

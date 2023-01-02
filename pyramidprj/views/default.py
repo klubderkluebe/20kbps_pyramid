@@ -54,7 +54,14 @@ def Releases(request):
     if release_page.custom_body:
         return Response(body=release_page.custom_body)
     
-    return render_to_response("pyramidprj:templates/release_page.jinja2", {"release_page": release_page})
+    return render_to_response(
+        "pyramidprj:templates/release_page.jinja2",
+        {
+            "release_page": release_page,
+            "release": release_page.release,
+            "data": release_page.release.release_data,
+        }
+    )
 
 
 db_err_msg = """\
