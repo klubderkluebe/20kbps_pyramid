@@ -9,4 +9,5 @@ def main(global_config, **settings):
         config.include('.routes')
         config.include('.models')
         config.scan()
+        config.add_tween("pyramidprj.tweens.response_middleware_tween_factory")
     return config.make_wsgi_app()

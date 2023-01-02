@@ -1,18 +1,15 @@
+import os.path
+
+import pyramid.httpexceptions as exc
 from pyramid.view import view_config
-from pyramid.response import Response
+from pyramid.response import FileResponse, Response
 from sqlalchemy.exc import SQLAlchemyError
 
 from .. import models
 
+import logging
 
-@view_config(route_name='home', renderer='pyramidprj:templates/mytemplate.jinja2')
-def my_view(request):
-    try:
-        query = request.dbsession.query(models.MyModel)
-        one = query.filter(models.MyModel.name == 'one').one()
-    except SQLAlchemyError:
-        return Response(db_err_msg, content_type='text/plain', status=500)
-    return {'one': one, 'project': 'pyramidprj'}
+log = logging.getLogger(__name__)
 
 
 @view_config(route_name='index2', renderer='pyramidprj:templates/index2.jinja2')
@@ -24,6 +21,39 @@ def index2(request):
         return Response(db_err_msg, content_type='text/plain', status=500)
 
     return {"records": records}
+
+
+def serve_file(file):
+    response = FileResponse("/home/jonas/pyramidprj/README.txt")
+    response.headers["Content-Disposition"] = f"attachment; filename={file}"
+    return response
+
+
+@view_config(route_name='Releases')
+@view_config(route_name="Releases_with_subdir")
+def Releases(request):
+    rlsdir_or_file = request.matchdict["rlsdir_or_file"]
+    if rlsdir_or_file.lower().endswith(".zip") or rlsdir_or_file.lower().endswith(".rar"):
+        return serve_file(rlsdir_or_file)
+
+    rlsdir = rlsdir_or_file
+    if "subdir" in request.matchdict:
+        rlsdir = os.path.join(rlsdir, request.matchdict["subdir"])
+
+    release_page = (
+        request.dbsession.query(models.ReleasePage)
+        .join(models.Release)
+        .filter(models.Release.release_dir == rlsdir)
+        .first()
+    )
+
+    if not release_page:
+        raise exc.HTTPNotFound()
+
+    if release_page.custom_body:
+        return Response(body=release_page.custom_body)
+    
+    return dict()
 
 
 db_err_msg = """\
