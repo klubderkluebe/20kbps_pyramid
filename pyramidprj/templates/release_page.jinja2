@@ -7,7 +7,7 @@
 
   <title>{{data['relname']}} by {{data['artist']}} | {{data['cat-no']}} | {{data['style']}}</title>
 <meta property="og:title" content="{{data['relname']}}" />
-	<meta property="og:image" content="https://20kbps.net/Releases/{{release.release_dir}}/cover.{{'png' if data['cover-file-type'] == 'png' else 'jpg'}}" />
+	<meta property="og:image" content="{{static_dir}}/cover.{{'png' if data['cover-file-type'] == 'png' else 'jpg'}}" />
 <meta property="og:url" content="https://20kbps.net/Releases/{{release.release_dir}}" />
 
 <meta property="og:description" content="{{data['description']}}" />
@@ -32,10 +32,10 @@
 <h1 itemprop="headline"><span itemprop="name">{{data['relname']}}</span> <span class="seperator">by</span><span itemprop="byArtist" itemscope itemtype="http://www.schema.org/MusicGroup"><span itemprop="name"> {{data['artist']}}</span></span> </h1>
    <div>
 
-	   <img src="cover.{{'png' if data['cover-file-type'] == 'png' else 'jpg'}}" alt="cover image" itemprop="image" class="cover-img"></div>
+	   <img src="{{static_dir}}/cover.{{'png' if data['cover-file-type'] == 'png' else 'jpg'}}" alt="cover image" itemprop="image" class="cover-img"></div>
 	<div>{{data['player']}}</div>
 	<div class="infotext">
-	<div ><a title="direct download" href="/Releases/{{release.file}}"><img class="icon" src="../../../ico/download.png" alt="download"/></a>
+	<div ><a title="direct download" href="{{static_base}}/Releases/{{release.file}}"><img class="icon" src="../../../ico/download.png" alt="download"/></a>
 
   {% if data['last'] %}
 	  <a href="{{data['last']}}" title="last.fm page" target="_blank"><img class="icon" src="../../../ico/last-icon.jpg" alt="last.fm"/></a>
@@ -73,10 +73,10 @@
   {% for idx, track in enumerate(release_page.player_files) %}
     <li itemprop="tracks" itemscope itemtype="http://www.schema.org/MusicRecording" itemref="video{{idx}} desc{{idx}}"><header><span itemprop="name">{{track.title}}</span><time datetime="{{track.duration_iso8601}}" itemprop="duration"> ({{track.duration_m_s}})</time></header>
       <audio controls preload >
-        <source itemprop=url src="{{track.file}}">
+        <source itemprop=url src="{{static_dir}}/{{track.file}}">
         <div>
           {% with extension=track.file.split('.')[-1] %}
-            {{extension}}: <a href="{{track.file}}" title="download this song in {{extension}} format"><img src="../../../ico/download.png" /></a>
+            {{extension}}: <a href="{{static_dir}}/{{track.file}}" title="download this song in {{extension}} format"><img src="../../../ico/download.png" /></a>
           {% endwith %}
         </div>
       </audio>

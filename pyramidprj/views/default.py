@@ -61,6 +61,11 @@ def Releases(request):
             "release": release_page.release,
             "data": release_page.release.release_data,
             "enumerate": enumerate,
+            "static_base": request.registry.settings["static_base"],
+            "static_dir": (
+                os.path.join(request.registry.settings["static_base"], "Releases", release_page.release.release_dir)
+            ),
+            "join": os.path.join,
         }
     )
 
