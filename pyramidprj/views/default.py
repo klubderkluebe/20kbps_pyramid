@@ -60,6 +60,7 @@ def Releases(request):
             "release_page": release_page,
             "release": release_page.release,
             "data": release_page.release.release_data,
+            "enumerate": enumerate,
         }
     )
 

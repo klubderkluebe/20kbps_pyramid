@@ -7,7 +7,42 @@ import logging
 log = logging.getLogger(__name__)
 
 
-def rewrite_links(response):
+LEGACY_STATIC_FILES = [
+    "ico/yikis.jpg",
+    "fav/rate_fav.ico",
+    "ico/humanstxt-isolated-blank.gif",
+    "ico/rate.ico",
+    "ico/last-icon.jpg",
+    "fav/orgasm.ico",
+    "humans.txt",
+    "Releases/humans.txt",
+    "favicontw.ico",
+    "css/relpage.css",
+    "fav/digg_favicon.ico",
+    "ico/glogo.jpg",
+    "record16.ico",
+    "ico/download.png",
+    "rss.png",
+    "Releases/slow-wave-sleep/elogio-della-follia/ITA Lyrics.pdf",
+    "fav/tumblr_fav.gif",
+    "20kbps.xml",
+    "rss/20kbps.xml",
+    "favicon_myspace.png",
+    "Releases/slow-wave-sleep/elogio-della-follia/ENG Lyrics.pdf",
+    "ico/discogs-icon.jpeg",
+    "fav/mcfav.png",
+]
+
+
+URL_ATTRIBUTES = {
+    "img": ("src",),
+    "a": ("href", "src",),
+    "link": ("href",),
+    "meta": ("content",)
+}
+
+
+def rewrite_links(response, registry):
     if response.status_code != 200 or response.content_type != "text/html":
         return response
 
@@ -17,11 +52,23 @@ def rewrite_links(response):
         body, encoding = response.body.decode("iso-8859-1"), "iso-8859-1"
 
     soup = BeautifulSoup(body, "html.parser")
-    for a in soup.find_all("a"):
-        pr = urlparse(a["href"])
-        if pr.netloc == "20kbps.sofapause.ch":
-            pr = pr._replace(netloc="20kbps.net")
-            a["href"] = urlunparse(pr)
+    for tag, attrs in URL_ATTRIBUTES.items():
+        elems = soup.find_all(tag)
+        for elem in elems:
+            for attr in attrs:
+                try:
+                    url = elem[attr]
+                except KeyError:
+                    continue
+                pr = urlparse(url)
+                if pr.netloc == "20kbps.sofapause.ch":
+                    pr = pr._replace(netloc="20kbps.net")
+                    elem[attr] = urlunparse(pr)
+                for file in LEGACY_STATIC_FILES:
+                    if pr.path.endswith(file):
+                        log.info(f"rewrite {file}")
+                        elem[attr] = f"{registry.settings['static_base']}/{file}"
+                        break
 
     response.body = soup.html.encode(encoding)  # type: ignore
     return response
@@ -37,7 +84,7 @@ def response_middleware_tween_factory(handler, registry):
     def response_middleware_tween(request):
         response = handler(request)        
         for middleware in RESPONSE_MIDDLEWARE:
-            response = middleware(response)
+            response = middleware(response, registry)
         return response
 
     return response_middleware_tween

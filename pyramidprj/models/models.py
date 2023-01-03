@@ -1,4 +1,4 @@
-import codecs
+import typing as t
 
 from sqlalchemy import (
     Column,
@@ -75,3 +75,28 @@ class PlayerFile(Base):
 
     release_page_id = Column(Integer, ForeignKey("release_page.id"))
     release_page = relationship("ReleasePage", back_populates="player_files")
+
+    @property
+    def _duration_m_s_tuple(self) -> t.Optional[t.Tuple[int, int]]:
+        if self.duration_secs is None:
+            return None
+
+        m = self.duration_secs // 60  # type: ignore
+        s = self.duration_secs - 60 * m
+        return m, s
+
+    @property
+    def duration_iso8601(self) -> str:
+        t = self._duration_m_s_tuple
+        if t is None:
+            return ""
+        m, s = t
+        return f"PT{m}M{s}S"
+
+    @property
+    def duration_m_s(self) -> str:
+        t = self._duration_m_s_tuple
+        if t is None:
+            return ""
+        m, s = t
+        return f"{m}:{s:02}"
