@@ -78,7 +78,7 @@ def _get_tracks_by_id3(rlsdir):
         tags = mf.tags  # type: ignore
         tracks.append({
             "number": i + 1,
-            "file": f,
+            "file": os.path.basename(f),
             "title": tags.get("TIT2").text[0],
             "duration_secs": round(mf.info.length),  # type: ignore
         })
