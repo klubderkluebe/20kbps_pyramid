@@ -1,4 +1,9 @@
 from pyramid.config import Configurator
+from pyramid.httpexceptions import HTTPNotFound
+
+
+def notfound(request):
+    return HTTPNotFound()
 
 
 def main(global_config, **settings):
