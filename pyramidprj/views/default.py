@@ -37,16 +37,9 @@ def Releases(request):
     if rlsdir_or_file.lower().endswith(".zip") or rlsdir_or_file.lower().endswith(".rar"):
         return serve_file(rlsdir_or_file)
 
-    rlsdir = rlsdir_or_file
-    if "subdir" in request.matchdict:
-        rlsdir = os.path.join(rlsdir, request.matchdict["subdir"])
-
-    release_page = (
-        request.dbsession.query(models.ReleasePage)
-        .join(models.Release)
-        .filter(models.Release.release_dir == rlsdir)
-        .first()
-    )
+    # The `resolve_release` middleware has added release to request, if found.
+    release = getattr(request, "release", None)
+    release_page = release.release_page if release else None
 
     if not release_page:
         raise exc.HTTPNotFound()

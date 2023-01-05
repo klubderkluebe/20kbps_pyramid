@@ -1,6 +1,8 @@
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import urlparse, urlunparse, urlunsplit
 
 from bs4 import BeautifulSoup
+
+from pyramidprj import models
 
 import logging
 
@@ -43,14 +45,18 @@ URL_ATTRIBUTES = {
 }
 
 
-def rewrite_links(response, registry):
+def rewrite_links(request, response, registry):
     if response.status_code != 200 or response.content_type != "text/html":
         return response
+
+    release = getattr(request, "release", None)
 
     try:
         body, encoding = response.body.decode("utf-8"), "utf-8"
     except UnicodeDecodeError:
         body, encoding = response.body.decode("iso-8859-1"), "iso-8859-1"
+
+    pr_static_base = urlparse(registry.settings['static_base'])
 
     soup = BeautifulSoup(body, "html.parser")
     for tag, attrs in URL_ATTRIBUTES.items():
@@ -62,6 +68,15 @@ def rewrite_links(response, registry):
                 except KeyError:
                     continue
                 pr = urlparse(url)
+
+                if (
+                    release
+                    and (pr.path.endswith("cover.jpg") or pr.path.endswith("cover.png"))
+                    and pr.netloc != pr_static_base.netloc
+                ):
+                    elem[attr] = f"{registry.settings['static_base']}/Releases/{release.release_dir}/{pr.path.split('/')[-1]}"
+                    break
+
 
                 if pr.netloc.endswith("archive.org") and pr.scheme == "http":
                     pr = pr._replace(scheme="https")
@@ -81,9 +96,47 @@ def rewrite_links(response, registry):
     return response
 
 
+def resolve_release(request, registry):
+    if request.path[-1] != "/":
+        return
+
+    path = request.path[:-1]
+    if (
+        "/Releases" not in path
+        or "." in path.split("/")[-1]
+    ):
+        return
+
+    rlsdir = path.replace("/Releases/", "")
+    rls = (
+        request.dbsession.query(models.Release)
+        .filter(
+            models.Release.release_dir == rlsdir
+        )
+        .first()
+    )
+    setattr(request, "release", rls)
+
+
+REQUEST_MIDDLEWARE = [
+    resolve_release,
+]
+
+
 RESPONSE_MIDDLEWARE = [
     rewrite_links,
 ]
+
+
+def request_middleware_tween_factory(handler, registry):
+
+    def request_middleware_tween(request):
+        for middleware in REQUEST_MIDDLEWARE:
+            middleware(request, registry)
+        response = handler(request)        
+        return response
+
+    return request_middleware_tween
 
 
 def response_middleware_tween_factory(handler, registry):
@@ -91,7 +144,7 @@ def response_middleware_tween_factory(handler, registry):
     def response_middleware_tween(request):
         response = handler(request)        
         for middleware in RESPONSE_MIDDLEWARE:
-            response = middleware(response, registry)
+            response = middleware(request, response, registry)
         return response
 
     return response_middleware_tween
