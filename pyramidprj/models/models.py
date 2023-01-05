@@ -64,6 +64,10 @@ class ReleasePage(Base):
 
     player_files = relationship("PlayerFile", back_populates="release_page")
 
+    custom_tracklist = Column(Text,
+        comment="Some releases have a list.inc.php file."
+    )
+
 
 class PlayerFile(Base):
     __tablename__ = "player_file"

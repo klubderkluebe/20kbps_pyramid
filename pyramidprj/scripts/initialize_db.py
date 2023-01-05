@@ -128,7 +128,7 @@ def setup_player_files(dbsession):
 
 
 def _get_release_data(rlsdir):
-    release_php_file = os.path.join(LEGACY_HTTPDOCS_DIRECTORY, "Releases", rlsdir, "release.php")
+    release_php_file = os.path.join(rlsdir, "release.php")
     if not os.path.exists(release_php_file):
         return dict()
 
@@ -164,6 +164,15 @@ def _get_release_data(rlsdir):
     return data
 
 
+def _get_custom_tracklist(rlsdir):
+    list_file = os.path.join(rlsdir, "list.inc.php")
+    if not os.path.exists(list_file):
+        return None
+
+    with open(list_file, "r") as f:
+        return f.read()
+
+
 def setup_release_pages(dbsession):
     query = dbsession.query(models.Release)
     releases = query.all()
@@ -186,12 +195,14 @@ def setup_release_pages(dbsession):
             with open(body_file, "r", encoding="iso-8859-1") as f:
                 body = f.read()
 
-        r.release_data = _get_release_data(r.release_dir)
+        r.release_data = _get_release_data(rlsdir)
+        custom_tracklist = _get_custom_tracklist(rlsdir)
 
         model = models.ReleasePage(
             release=r,
             content=body if is_pr_text else None,
             custom_body=body if not is_pr_text else None,
+            custom_tracklist=custom_tracklist,
         )
         dbsession.add(model)
     

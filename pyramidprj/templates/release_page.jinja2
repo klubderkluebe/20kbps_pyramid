@@ -29,71 +29,79 @@
 </header>
 <div align="center" itemscope itemtype="http://www.schema.org/MusicAlbum">
 
-<h1 itemprop="headline"><span itemprop="name">{{data['relname']}}</span> <span class="seperator">by</span><span itemprop="byArtist" itemscope itemtype="http://www.schema.org/MusicGroup"><span itemprop="name"> {{data['artist']}}</span></span> </h1>
-   <div>
+  <h1 itemprop="headline"><span itemprop="name">{{data['relname']}}</span> <span class="seperator">by</span><span itemprop="byArtist" itemscope itemtype="http://www.schema.org/MusicGroup"><span itemprop="name"> {{data['artist']}}</span></span> </h1>
+    <div>
+      <img src="{{static_dir}}/cover.{{'png' if data['cover-file-type'] == 'png' else 'jpg'}}" alt="cover image" itemprop="image" class="cover-img">
+    </div>
 
-	   <img src="{{static_dir}}/cover.{{'png' if data['cover-file-type'] == 'png' else 'jpg'}}" alt="cover image" itemprop="image" class="cover-img"></div>
-	<div>{{data['player']|safe}}</div>
-	<div class="infotext">
-	<div >
-    <a title="direct download" href="{{static_base}}/Releases/{{release.file}}"><img class="icon" src="../../../ico/download.png" alt="download"/></a>
+    <div>
+      {{data['player']|safe}}
 
-    {% if data['yikis'] %}
-      <a  href="{{data['yikis']}}" title="Yeah, I Know it Sucks Review" target="_blank"><img class="icon" src="../../../ico/yikis.jpg" alt="Yeah, I Know it sucks"/></a>
-    {% endif %}
+      <div class="infotext">
+        <div >
+          <a title="direct download" href="{{static_base}}/Releases/{{release.file}}"><img class="icon" src="../../../ico/download.png" alt="download"/></a>
 
-    {% if data['last'] %}
-      <a href="{{data['last']}}" title="last.fm page" target="_blank"><img class="icon" src="../../../ico/last-icon.jpg" alt="last.fm"/></a>
-    {% endif %}
+          {% if data['yikis'] %}
+            <a  href="{{data['yikis']}}" title="Yeah, I Know it Sucks Review" target="_blank"><img class="icon" src="../../../ico/yikis.jpg" alt="Yeah, I Know it sucks"/></a>
+          {% endif %}
 
-    {% if data['archive'] %}
-      <a href="{{data['archive']}}" title="archive.org page"  target="_blank"><img class="icon" src="../../../ico/glogo.jpg" alt="archive.org"/></a>
-    {% endif %}
+          {% if data['last'] %}
+            <a href="{{data['last']}}" title="last.fm page" target="_blank"><img class="icon" src="../../../ico/last-icon.jpg" alt="last.fm"/></a>
+          {% endif %}
 
-    {% if data['discogs'] %}
-      <a href="{{data['discogs']}}" title="discogs page" target="_blank"><img class="icon" src="../../../ico/discogs-icon.jpeg" alt="discogs"/></a>
-    {% endif %}
+          {% if data['archive'] %}
+            <a href="{{data['archive']}}" title="archive.org page"  target="_blank"><img class="icon" src="../../../ico/glogo.jpg" alt="archive.org"/></a>
+          {% endif %}
 
-    {% if data['rateyourmusic'] %}
-      <a href="{{data['rateyourmusic']}}" title="rateyourmusic page" target="_blank"><img class="icon" src="../../../ico/rate.ico" alt="rateyourmusic"/></a>
-    {% endif %}
+          {% if data['discogs'] %}
+            <a href="{{data['discogs']}}" title="discogs page" target="_blank"><img class="icon" src="../../../ico/discogs-icon.jpeg" alt="discogs"/></a>
+          {% endif %}
 
-    {% if data['audioorgasm'] %}
-      <a href="{{data['audioorgasm']}}" title="AudioOrgasm page" page" target="_blank"><img class="icon" src="../../../fav/orgasm.ico" alt="audio orgasm"/></a>
-    {% endif %}		
-	</div>
-	<article itemprop="description" role="main">
-    {{release_page.content|safe}}
-	</article>
-	<br>
-	</div>
+          {% if data['rateyourmusic'] %}
+            <a href="{{data['rateyourmusic']}}" title="rateyourmusic page" target="_blank"><img class="icon" src="../../../ico/rate.ico" alt="rateyourmusic"/></a>
+          {% endif %}
 
-
-<h2>Tracklist</h2>
-	
-
-<{{data['list']}} class="tracklist" >  
-
-  {% for idx, track in enumerate(release_page.player_files) %}
-    <li itemprop="tracks" itemscope itemtype="http://www.schema.org/MusicRecording" itemref="video{{idx}} desc{{idx}}"><header><span itemprop="name">{{track.title}}</span><time datetime="{{track.duration_iso8601}}" itemprop="duration"> ({{track.duration_m_s}})</time></header>
-      <audio controls preload >
-        <source itemprop=url src="{{static_dir}}/{{track.file}}">
-        <div>
-          {% with extension=track.file.split('.')[-1] %}
-            {{extension}}: <a href="{{static_dir}}/{{track.file}}" title="download this song in {{extension}} format"><img src="../../../ico/download.png" /></a>
-          {% endwith %}
+          {% if data['audioorgasm'] %}
+            <a href="{{data['audioorgasm']}}" title="AudioOrgasm page" page" target="_blank"><img class="icon" src="../../../fav/orgasm.ico" alt="audio orgasm"/></a>
+          {% endif %}		
         </div>
-      </audio>
-    </li>
-  {% endfor %}
 
-</{{data['list']}}>
+        <article itemprop="description" role="main">
+          {{release_page.content|safe}}
+        </article>
 
-<!-- <h2>Video Clips</h2> -->
-<footer role="contentinfo">
-<p><small>{{release.catalog_no}} | <time datetime="{{data['date']}}" itemprop="datePublished">{{data['date']}}</time> | <a href="/index2.htm" title="homepage" itemprop="publisher" itemscope itemtype="http://www.schema.org/Organization"><span itemprop="name">20kbps</span></a></small>
-</div>
-</footer>
+        <br>
+      </div>   <!-- infotext -->
+
+      <h2>Tracklist</h2>
+      
+      <{{data['list']}} class="tracklist" >  
+        {% if release_page.player_files %}
+          {% for idx, track in enumerate(release_page.player_files) %}
+            <li itemprop="tracks" itemscope itemtype="http://www.schema.org/MusicRecording" itemref="video{{idx}} desc{{idx}}"><header><span itemprop="name">{{track.title}}</span><time datetime="{{track.duration_iso8601}}" itemprop="duration"> ({{track.duration_m_s}})</time></header>
+              <audio controls preload >
+                <source itemprop=url src="{{static_dir}}/{{track.file}}">
+                <div>
+                  {% with extension=track.file.split('.')[-1] %}
+                    {{extension}}: <a href="{{static_dir}}/{{track.file}}" title="download this song in {{extension}} format"><img src="../../../ico/download.png" /></a>
+                  {% endwith %}
+                </div>
+              </audio>
+            </li>
+          {% endfor %}
+        {% else %}
+          {{release_page.custom_tracklist|safe}}
+        {% endif %}
+      </{{data['list']}}>
+
+    <footer role="contentinfo">
+    <p><small>{{release.catalog_no}} | <time datetime="{{data['date']}}" itemprop="datePublished">{{data['date']}}</time> | <a href="/index2.htm" title="homepage" itemprop="publisher" itemscope itemtype="http://www.schema.org/Organization"><span itemprop="name">20kbps</span></a></small>
+    </footer>
+
+  </div>
+
+</div>  <!-- MusicAlbum -->
+
 </body>
 
 </html>
