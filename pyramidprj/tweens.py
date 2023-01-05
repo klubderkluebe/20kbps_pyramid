@@ -38,7 +38,8 @@ URL_ATTRIBUTES = {
     "img": ("src",),
     "a": ("href", "src",),
     "link": ("href",),
-    "meta": ("content",)
+    "meta": ("content",),
+    "iframe": ("src",),
 }
 
 
@@ -61,6 +62,12 @@ def rewrite_links(response, registry):
                 except KeyError:
                     continue
                 pr = urlparse(url)
+
+                if pr.netloc.endswith("archive.org") and pr.scheme == "http":
+                    pr = pr._replace(scheme="https")
+                    elem[attr] = urlunparse(pr)
+                    break
+
                 if pr.netloc == "20kbps.sofapause.ch":
                     pr = pr._replace(netloc="20kbps.net")
                     elem[attr] = urlunparse(pr)
