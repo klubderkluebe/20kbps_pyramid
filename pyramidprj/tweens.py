@@ -92,7 +92,7 @@ def rewrite_links(request, response, registry):
                     elem[attr] = f"{static_base}/Releases/{pr.path.split('/')[-1]}"
                     break
 
-                # Seome releases specify a custom player in `release_data["player"]`.
+                # Some releases specify a custom player in `release_data["player"]`.
                 # The embedded URL must be forced to https.
                 if pr.netloc.endswith("archive.org") and pr.scheme == "http":
                     pr = pr._replace(scheme="https")
