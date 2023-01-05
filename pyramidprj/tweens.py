@@ -46,9 +46,14 @@ URL_ATTRIBUTES = {
 
 
 def rewrite_links(request, response, registry):
+    """
+    A lot of the imported HTML has URLs that must be rewritten.
+    This middleware takes care of it after a view has been rendered to a response.
+    """
     if response.status_code != 200 or response.content_type != "text/html":
         return response
 
+    # The `resolve_release` middleware has added release to request, if found.
     release = getattr(request, "release", None)
 
     try:
@@ -70,6 +75,8 @@ def rewrite_links(request, response, registry):
                     continue
                 pr = urlparse(url)
 
+                # Release pages with `custom_body` (from <release_dir>/index.html)
+                # need their cover URL rewritten to point to static asset storage.
                 if (
                     release
                     and (pr.path.endswith("cover.jpg") or pr.path.endswith("cover.png"))
@@ -78,20 +85,26 @@ def rewrite_links(request, response, registry):
                     elem[attr] = f"{static_base}/Releases/{release.release_dir}/{pr.path.split('/')[-1]}"
                     break
 
+                # Any release archive file URL needs to point to static asset storage.
                 if (
                     pr.path.lower().endswith(".zip") or pr.path.lower().endswith(".rar")
                 ):
                     elem[attr] = f"{static_base}/Releases/{pr.path.split('/')[-1]}"
                     break
 
+                # Seome releases specify a custom player in `release_data["player"]`.
+                # The embedded URL must be forced to https.
                 if pr.netloc.endswith("archive.org") and pr.scheme == "http":
                     pr = pr._replace(scheme="https")
                     elem[attr] = urlunparse(pr)
                     break
 
+                # Rewrite the obsolete domain to 20kbps.net.
                 if pr.netloc == "20kbps.sofapause.ch":
                     pr = pr._replace(netloc="20kbps.net")
                     elem[attr] = urlunparse(pr)
+
+                # Any file in LEGACY_STATIC_FILES must point to static asset storage.
                 for file in LEGACY_STATIC_FILES:
                     if pr.path.endswith(file):
                         log.info(f"rewrite {file}")
@@ -103,6 +116,9 @@ def rewrite_links(request, response, registry):
 
 
 def resolve_release(request, registry):
+    """
+    When the URL is for a release page, resolve the `Release` object and add it to the request.
+    """
     if request.path[-1] != "/":
         return
 
