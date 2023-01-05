@@ -81,26 +81,30 @@ class PlayerFile(Base):
     release_page = relationship("ReleasePage", back_populates="player_files")
 
     @property
-    def _duration_m_s_tuple(self) -> t.Optional[t.Tuple[int, int]]:
+    def _duration_tuple(self):
         if self.duration_secs is None:
             return None
 
-        m = self.duration_secs // 60  # type: ignore
-        s = self.duration_secs - 60 * m
-        return m, s
+        secs = t.cast(int, self.duration_secs)
+        h = secs // 3600
+        m = (secs - 3600 * h) // 60
+        s = secs - 3600 * h - 60 * m
+        return [h, m, s]
 
     @property
     def duration_iso8601(self) -> str:
-        t = self._duration_m_s_tuple
-        if t is None:
+        hms = self._duration_tuple
+        if hms is None:
             return ""
-        m, s = t
-        return f"PT{m}M{s}S"
+
+        ifst = next(i for i in range(3) if hms[i])
+        return "PT" + "".join(f"{x}{c}" for x, c in zip(hms[ifst:], ["H", "M", "S"][ifst:]))
 
     @property
-    def duration_m_s(self) -> str:
-        t = self._duration_m_s_tuple
-        if t is None:
+    def duration(self) -> str:
+        hms = self._duration_tuple
+        if hms is None:
             return ""
-        m, s = t
-        return f"{m}:{s:02}"
+
+        ifst = next(i for i in range(3) if hms[i])
+        return ":".join(f"{x:02}" for x in hms[ifst:])

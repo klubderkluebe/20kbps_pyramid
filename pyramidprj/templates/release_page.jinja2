@@ -78,7 +78,7 @@
       <{{data['list']}} class="tracklist" >  
         {% if release_page.player_files %}
           {% for idx, track in enumerate(release_page.player_files) %}
-            <li itemprop="tracks" itemscope itemtype="http://www.schema.org/MusicRecording" itemref="video{{idx}} desc{{idx}}"><header><span itemprop="name">{{track.title}}</span><time datetime="{{track.duration_iso8601}}" itemprop="duration"> ({{track.duration_m_s}})</time></header>
+            <li itemprop="tracks" itemscope itemtype="http://www.schema.org/MusicRecording" itemref="video{{idx}} desc{{idx}}"><header><span itemprop="name">{{track.title}}</span><time datetime="{{track.duration_iso8601}}" itemprop="duration"> ({{track.duration}})</time></header>
               <audio controls preload >
                 <source itemprop=url src="{{static_dir}}/{{track.file}}">
                 <div>
