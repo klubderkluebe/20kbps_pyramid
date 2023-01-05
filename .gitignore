@@ -22,3 +22,4 @@ test
 *.sqlite
 node_modules
 pyramidprj.code-workspace
+viztest/*.png

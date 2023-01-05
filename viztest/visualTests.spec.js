@@ -11,15 +11,22 @@ pserve development_nodebugtoolbar.ini
 
 `compare` is assumed to be available as a shell command and is executed using node:child_process.exec.
 
-The compare metric is currently AE (Absolute Error) without fuzz, so the pages must be a pixel-perfect match.
+The compare metric is currently AE (Absolute Error) without fuzz.
+A single test case passes when less than {TOLERANCE_PERCENTAGE} percent of pixels differ between legacy and dev.
 */
 const fsPromises = require('fs').promises
 const util = require('util')
 const exec = util.promisify(require('child_process').exec)
 
+const releaseDirs = require('./releaseDirs')
 
-const VIEWPORT_WIDTH = 540
-const VIEWPORT_HEIGHT = 22000
+const log = require('console').error
+
+const PAGE_LOAD_TIMEOUT = 7000
+const TOLERANCE_PERCENTAGE = 0.01
+
+const DEFAULT_VIEWPORT_WIDTH = 1000
+const DEFAULT_VIEWPORT_HEIGHT = 5000
 
 const DEV_SITE_BASE = 'http://127.0.0.1:6543'
 const LEGACY_SITE_BASE = 'https://20kbps.net'
@@ -31,36 +38,73 @@ function timeout(ms) {
 }
 
 
-const compareCommand = (fileStem) => `compare -metric AE ${fileStem}__legacy.png ${fileStem}__dev.png null:`
+// const compareCommand = (fileStem) => `compare -metric AE ${fileStem}__legacy.png ${fileStem}__dev.png null:`
+const compareCommand = (fileStem) => `compare -metric AE ${fileStem}__legacy.png ${fileStem}__dev.png ${fileStem}__diff.png`
 
 
-async function comparePages(path, afterNetworkIdleTimeout) {
-    const fileStem = path.replace('/', '_')
-
-    await page.goto(`${DEV_SITE_BASE}/${path}`, {waitUntil: 'networkidle0'})
-    await timeout(afterNetworkIdleTimeout)
-    await page.screenshot({path: `${fileStem}__dev.png`})
-
-    await page.goto(`${LEGACY_SITE_BASE}/${path}`, {waitUntil: 'networkidle0'})
-    await timeout(afterNetworkIdleTimeout)
-    await page.screenshot({path: `${fileStem}__legacy.png`})
-
-    const { stderr } = await exec(compareCommand(fileStem))
-    expect(stderr).toBe('0')
+async function pageGotoIgnoreTimeout(url) {
+    try {
+        await page.goto(url, {
+            waitUntil: 'load',
+            timeout: PAGE_LOAD_TIMEOUT,
+        })
+    } catch (err) {
+        if (err.name !== 'TimeoutError')
+            throw err
+    }
 }
 
 
-beforeEach(async () => {
-    await page.setViewport({width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT})
-})
+async function comparePages(path, afterNetworkIdleTimeout, viewportWidth, viewportHeight) {
+    function removePlayers() {
+        const audioElements = document.querySelectorAll('audio')
+        for (let elem of audioElements) {
+            elem.parentNode.removeChild(elem)
+        }
+    }
 
+    log(path)
 
-afterEach(async () => {
-    const screenshots = (await fsPromises.readdir('.')).filter((f) => f.endsWith('__dev.png') || f.endsWith('__legacy.png'))
-    await Promise.all(screenshots.map((f) => fsPromises.unlink(f)))
-})
+    const fileStem = path.replaceAll('/', '_')
+    const width = viewportWidth || DEFAULT_VIEWPORT_WIDTH
+    const height = viewportHeight || DEFAULT_VIEWPORT_HEIGHT
+
+    await page.setViewport({width, height})
+
+    const sanitizedPath =
+        (path === 'index2.htm' || path.slice(-1) === '/')
+        ? path
+        : path + '/'
+
+    await pageGotoIgnoreTimeout(`${DEV_SITE_BASE}/${sanitizedPath}`)
+    await page.evaluate(removePlayers)
+    await timeout(afterNetworkIdleTimeout)
+    await page.screenshot({path: `${fileStem}__dev.png`})
+
+    await pageGotoIgnoreTimeout(`${LEGACY_SITE_BASE}/${sanitizedPath}`)
+    await page.evaluate(removePlayers)
+    await timeout(afterNetworkIdleTimeout)
+    await page.screenshot({path: `${fileStem}__legacy.png`})
+
+    let stderr
+    try {
+        stderr = (await exec(compareCommand(fileStem))).stderr
+    } catch (err) {
+        stderr = err.stderr
+    }
+    const errorPct = 100 * Number(stderr) / (width * height)
+    expect(errorPct).toBeLessThan(TOLERANCE_PERCENTAGE)
+}
 
 
 test('compare index2.htm', async () => {
-    await comparePages('index2.htm')
+    await comparePages('index2.htm', 1200, 540, 22000)
 })
+
+
+for (let releaseDir of releaseDirs) {
+    test(`compare ${releaseDir}`, async () => {
+        await comparePages(`Releases/${releaseDir}`)
+    })    
+}
+

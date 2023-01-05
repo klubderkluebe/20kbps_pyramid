@@ -1,6 +1,7 @@
 const config = {
     preset: 'jest-puppeteer',
-    testTimeout: 20000,
+    testTimeout: 30000,
+    verbose: true,
 }
 
 

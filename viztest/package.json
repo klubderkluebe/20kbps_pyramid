@@ -4,7 +4,7 @@
   "description": "Visual tests for 20kbps_pyramid",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "rm *.png &>/dev/null; jest --runInBand"
   },
   "author": "",
   "license": "ISC",
