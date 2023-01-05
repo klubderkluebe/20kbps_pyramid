@@ -56,7 +56,8 @@ def rewrite_links(request, response, registry):
     except UnicodeDecodeError:
         body, encoding = response.body.decode("iso-8859-1"), "iso-8859-1"
 
-    pr_static_base = urlparse(registry.settings['static_base'])
+    static_base = registry.settings['static_base']
+    pr_static_base = urlparse(static_base)
 
     soup = BeautifulSoup(body, "html.parser")
     for tag, attrs in URL_ATTRIBUTES.items():
@@ -74,9 +75,14 @@ def rewrite_links(request, response, registry):
                     and (pr.path.endswith("cover.jpg") or pr.path.endswith("cover.png"))
                     and pr.netloc != pr_static_base.netloc
                 ):
-                    elem[attr] = f"{registry.settings['static_base']}/Releases/{release.release_dir}/{pr.path.split('/')[-1]}"
+                    elem[attr] = f"{static_base}/Releases/{release.release_dir}/{pr.path.split('/')[-1]}"
                     break
 
+                if (
+                    pr.path.lower().endswith(".zip") or pr.path.lower().endswith(".rar")
+                ):
+                    elem[attr] = f"{static_base}/Releases/{pr.path.split('/')[-1]}"
+                    break
 
                 if pr.netloc.endswith("archive.org") and pr.scheme == "http":
                     pr = pr._replace(scheme="https")
@@ -89,7 +95,7 @@ def rewrite_links(request, response, registry):
                 for file in LEGACY_STATIC_FILES:
                     if pr.path.endswith(file):
                         log.info(f"rewrite {file}")
-                        elem[attr] = f"{registry.settings['static_base']}/{file}"
+                        elem[attr] = f"{static_base}/{file}"
                         break
 
     response.body = str(soup).encode(encoding)  # type: ignore
