@@ -33,7 +33,7 @@
    <div>
 
 	   <img src="{{static_dir}}/cover.{{'png' if data['cover-file-type'] == 'png' else 'jpg'}}" alt="cover image" itemprop="image" class="cover-img"></div>
-	<div>{{data['player']}}</div>
+	<div>{{data['player']|safe}}</div>
 	<div class="infotext">
 	<div >
     <a title="direct download" href="{{static_base}}/Releases/{{release.file}}"><img class="icon" src="../../../ico/download.png" alt="download"/></a>
