@@ -1,4 +1,4 @@
-from urllib.parse import urlparse, urlunparse, urlunsplit
+from urllib.parse import urlparse, urlunparse
 
 from bs4 import BeautifulSoup
 
