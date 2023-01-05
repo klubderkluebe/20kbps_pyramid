@@ -77,7 +77,7 @@ def rewrite_links(response, registry):
                         elem[attr] = f"{registry.settings['static_base']}/{file}"
                         break
 
-    response.body = soup.html.encode(encoding)  # type: ignore
+    response.body = str(soup).encode(encoding)  # type: ignore
     return response
 
 
