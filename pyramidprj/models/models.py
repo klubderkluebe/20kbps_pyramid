@@ -97,7 +97,7 @@ class PlayerFile(Base):
         if hms is None:
             return ""
 
-        ifst = next(i for i in range(3) if hms[i])
+        ifst = 0 if hms[0] else 1
         return "PT" + "".join(f"{x}{c}" for x, c in zip(hms[ifst:], ["H", "M", "S"][ifst:]))
 
     @property
@@ -106,5 +106,5 @@ class PlayerFile(Base):
         if hms is None:
             return ""
 
-        ifst = next(i for i in range(3) if hms[i])
+        ifst = 0 if hms[0] else 1
         return ":".join(f"{x:02}" for x in hms[ifst:])
