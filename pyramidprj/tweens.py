@@ -130,8 +130,6 @@ def resolve_release(request, registry):
 
     rlsdir = unquote(path.replace("/Releases/", ""))
 
-    print(f"Resolve rlsdir '{rlsdir}'")
-
     rls = (
         request.dbsession.query(models.Release)
         .filter(
