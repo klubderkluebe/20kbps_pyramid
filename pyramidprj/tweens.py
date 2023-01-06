@@ -1,6 +1,7 @@
 from urllib.parse import unquote, urlparse, urlunparse
 
 from bs4 import BeautifulSoup
+from cachetools import cached
 
 from pyramidprj import models
 
@@ -45,14 +46,15 @@ URL_ATTRIBUTES = {
 }
 
 
-def rewrite_links(request, response, registry):
-    """
-    A lot of the imported HTML has URLs that must be rewritten.
-    This middleware takes care of it after a view has been rendered to a response.
-    """
-    if response.status_code != 200 or response.content_type != "text/html":
-        return response
+def _get_doc_with_links_rewritten__keyfn(request, response, registry):
+    return request.path
 
+
+# Keeping these rewrites ephemeral was a design decision.
+# No need to execute them more than once for the same document though.
+#
+@cached(cache={}, key=_get_doc_with_links_rewritten__keyfn)
+def _get_doc_with_links_rewritten(request, response, registry):
     # The `resolve_release` middleware has added release to request, if found.
     release = getattr(request, "release", None)
 
@@ -110,7 +112,18 @@ def rewrite_links(request, response, registry):
                         elem[attr] = f"{static_base}/{file}"
                         break
 
-    response.body = str(soup).encode(encoding)  # type: ignore
+    return str(soup).encode(encoding)  # type: ignore
+
+
+def rewrite_links(request, response, registry):
+    """
+    A lot of the imported HTML has URLs that must be rewritten.
+    This middleware takes care of it after a view has been rendered to a response.
+    """
+    if response.status_code != 200 or response.content_type != "text/html":
+        return response
+
+    response.body = _get_doc_with_links_rewritten(request, response, registry)
     return response
 
 
