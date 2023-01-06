@@ -64,7 +64,7 @@ def rewrite_links(request, response, registry):
     static_base = registry.settings['static_base']
     pr_static_base = urlparse(static_base)
 
-    soup = BeautifulSoup(body, "html.parser")
+    soup = BeautifulSoup(body, "html5lib")
     for tag, attrs in URL_ATTRIBUTES.items():
         elems = soup.find_all(tag)
         for elem in elems:

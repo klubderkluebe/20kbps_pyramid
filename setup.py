@@ -24,6 +24,7 @@ requires = [
     "pyramid_ipython",
     "mutagen",
     "php-whisperer",
+    "html5lib",
 ]
 
 tests_require = [

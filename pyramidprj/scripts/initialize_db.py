@@ -173,7 +173,6 @@ def _get_custom_tracklist(rlsdir):
         with open(list_file, "r", encoding="utf-8") as f:
             return f.read()
     except UnicodeDecodeError:
-        print(f"using iso-8859-1 fallback: {rlsdir}")
         with open(list_file, "r", encoding="iso-8859-1") as f:
             return f.read()
 
@@ -231,7 +230,7 @@ def setup_releases(dbsession):
     query = dbsession.query(models.IndexRecord)
     records = query.all()
     for rec in records:
-        soup = BeautifulSoup(rec.body, "html.parser")
+        soup = BeautifulSoup(rec.body, "html5lib")
         anchors = soup.find_all("a")
         hrefs = {a["href"] for a in anchors}
         anchor_texts = [a.text for a in anchors]
@@ -281,7 +280,7 @@ def setup_releases(dbsession):
                     release_index_file = os.path.join(LEGACY_HTTPDOCS_DIRECTORY, "Releases", rlsdir, "index.html")
                     with open(release_index_file, "r", encoding="iso-8859-1") as f:
                         release_html = f.read()
-                    soup = BeautifulSoup(release_html, "html.parser")
+                    soup = BeautifulSoup(release_html, "html5lib")
                     file = next(a["href"] for a in soup.find_all("a") if a["href"].lower().endswith(".zip"))
                     catalog_no = ptn_html20kx.search(release_html).groups()[0]  # type: ignore
                     catalog_nos.add(catalog_no)  # type: ignore
@@ -356,7 +355,7 @@ def setup_index_records(dbsession):
     with open(f"{LEGACY_HTTPDOCS_DIRECTORY}/index2.htm", "r") as f:
         html_doc = f.read()
 
-    soup = BeautifulSoup(html_doc, "html.parser")
+    soup = BeautifulSoup(html_doc, "html5lib")
     r = soup.find_all(lambda t: t.name == "tr" and t.get("valign", "").lower() == "top")  # type: ignore
 
     records = []
