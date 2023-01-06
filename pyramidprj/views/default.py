@@ -24,19 +24,9 @@ def index2(request):
     return {"records": records}
 
 
-def serve_file(file):
-    response = FileResponse("/home/jonas/pyramidprj/README.txt")
-    response.headers["Content-Disposition"] = f"attachment; filename={file}"
-    return response
-
-
 @view_config(route_name='Releases')
 @view_config(route_name="Releases_with_subdir")
 def Releases(request):
-    rlsdir_or_file = request.matchdict["rlsdir_or_file"]
-    if rlsdir_or_file.lower().endswith(".zip") or rlsdir_or_file.lower().endswith(".rar"):
-        return serve_file(rlsdir_or_file)
-
     # The `resolve_release` middleware has added release to request, if found.
     release = getattr(request, "release", None)
     release_page = release.release_page if release else None

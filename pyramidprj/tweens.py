@@ -107,7 +107,6 @@ def rewrite_links(request, response, registry):
                 # Any file in LEGACY_STATIC_FILES must point to static asset storage.
                 for file in LEGACY_STATIC_FILES:
                     if pr.path.endswith(file):
-                        log.info(f"rewrite {file}")
                         elem[attr] = f"{static_base}/{file}"
                         break
 
