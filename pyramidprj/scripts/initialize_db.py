@@ -87,8 +87,8 @@ def _get_tracks_by_id3(rlsdir):
 
 def setup_player_files(dbsession):
     ptn_tracksarr = re.compile(r'"tracks" => array\((.*)\);', re.DOTALL)
-    ptn_track = re.compile(r'new track\(.*?"(.*?)".*?,.*?"(.*?)".*?,.*?"(\d*)".*?\)', re.DOTALL)
-
+    ptn_track = re.compile(r'new track\(.*?"(.*?)(?<!\\)".*?,.*?"(.*?)".*?,.*?"(\d*)".*?\)', re.DOTALL)
+    
     query = dbsession.query(models.ReleasePage)
     pages = query.all()
     for pg in pages:
