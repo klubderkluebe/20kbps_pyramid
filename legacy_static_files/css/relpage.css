@@ -1,0 +1,36 @@
+* {font-family:
+    "Bookman Old Style",	/* Windows, MacOS */
+    "URW Bookman L",		/* Unix+X+FontConfig */
+    "itc bookman",		/* Unix+X */
+/* Fallback options */
+    times,			/* Unix+X, MacOS */
+    serif;
+	} 
+.infotext {text-align: justify; max-width: 480px; margin-top: 20px;}
+.seperator {color: #468443;}
+.icon {width: 32px; height: 32px; margin: 5px 5px 20px 0;}
+.tracklist {text-align: left; width: 480px;}
+.textlink {background: url(https://storage.googleapis.com/20kbps-static/ico/link.png) no-repeat 0 2px; margin: 0 0 0 3px; padding: 0 0 0 20px; text-decoration: none;}
+.listlink {background: url(https://storage.googleapis.com/20kbps-static/ico/link-2.png) no-repeat 0 2px; margin: 0 0 0 3px; padding: 0 0 0 20px; text-decoration: none;}
+.textlink span, .listlink span {border-bottom: 1px #65829a dotted; color: black;}
+.listlink span {color: #435767}
+.feature{text-align: left; width: 480px;}
+.sonicsquirrel {margin-top: 20px;}
+.hint {margin-bottom: 20px; text-align: justify; max-width: 480px;}
+ul {width: 480px}
+li {margin-bottom: 20px}
+ul li {list-style-type: none ; font-size: 16px; text-align: left; margin-left: -35px;}
+ul li span { font-size: 18px; }
+h2 {font-size: 18px; margin-top: 20px;}
+img {border: none;}
+li {white-space: nowrap;text-align: left;}
+strong { font-weight: normal;}
+strong span {white-space: nowrap;}
+audio img {width:16px;float:left; }
+iframe {width: 480px; height: 30px}
+[itemprop=video] iframe {display:block; margin: 20px 0; width: 560px; height: 315px}
+blockquote {width: 480px; text-align: justify}
+.cover-img { max-width: 800px;}
+main {
+    text-align: center;
+}
