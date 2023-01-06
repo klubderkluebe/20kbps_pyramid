@@ -61,6 +61,10 @@ async function comparePages(path, afterNetworkIdleTimeout, viewportWidth, viewpo
         for (let elem of audioElements) {
             elem.parentNode.removeChild(elem)
         }
+        const iframe = document.querySelector('iframe')
+        if (iframe) {
+            iframe.parentNode.removeChild(iframe)
+        }
     }
 
     log(path)
