@@ -74,6 +74,7 @@ async function comparePages(path, afterNetworkIdleTimeout, viewportWidth, viewpo
     const height = viewportHeight || DEFAULT_VIEWPORT_HEIGHT
 
     await page.setViewport({width, height})
+    await page.setCacheEnabled(false)
 
     const sanitizedPath =
         (path === 'index2.htm' || path.slice(-1) === '/')
