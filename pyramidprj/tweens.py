@@ -1,4 +1,4 @@
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import unquote, urlparse, urlunparse
 
 from bs4 import BeautifulSoup
 
@@ -128,7 +128,10 @@ def resolve_release(request, registry):
     ):
         return
 
-    rlsdir = path.replace("/Releases/", "")
+    rlsdir = unquote(path.replace("/Releases/", ""))
+
+    print(f"Resolve rlsdir '{rlsdir}'")
+
     rls = (
         request.dbsession.query(models.Release)
         .filter(
