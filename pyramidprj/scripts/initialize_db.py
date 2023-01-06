@@ -106,7 +106,7 @@ def setup_player_files(dbsession):
                 {
                     "number": i + 1,
                     "file": t[1],
-                    "title": t[0],
+                    "title": t[0].replace('\\"', '"'),
                     "duration_secs": int(t[2]) if t[2] else None,
                 }
                 for i, t in enumerate(ptn_track.findall(s_tracksarr))
