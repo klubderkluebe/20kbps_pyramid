@@ -169,8 +169,14 @@ def _get_custom_tracklist(rlsdir):
     if not os.path.exists(list_file):
         return None
 
-    with open(list_file, "r") as f:
-        return f.read()
+    try:
+        with open(list_file, "r", encoding="utf-8") as f:
+            return f.read()
+    except UnicodeDecodeError:
+        print(f"using iso-8859-1 fallback: {rlsdir}")
+        with open(list_file, "r", encoding="iso-8859-1") as f:
+            return f.read()
+
 
 
 def setup_release_pages(dbsession):
