@@ -25,6 +25,8 @@ requires = [
     "mutagen",
     "php-whisperer",
     "html5lib",
+    "requests",
+    "pathvalidate",
 ]
 
 tests_require = [

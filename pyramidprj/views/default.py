@@ -1,3 +1,4 @@
+import json
 import os.path
 
 import pyramid.httpexceptions as exc
@@ -6,19 +7,23 @@ from pyramid.response import FileResponse, Response
 from pyramid.view import view_config
 from sqlalchemy.exc import SQLAlchemyError
 
+import requests
+import zipfile
+
 from .. import models
+from ..release_creator import ReleaseCreator
 
 import logging
 
 log = logging.getLogger(__name__)
 
 
-@view_config(route_name="home", renderer="pyramidprj:templates/index.jinja2")
+@view_config(route_name="home", renderer="pyramidprj:templates/index.jinja2", permission="🕉")
 def index(request):
     return {}
 
 
-@view_config(route_name='index2', renderer='pyramidprj:templates/index2.jinja2')
+@view_config(route_name='index2', renderer='pyramidprj:templates/index2.jinja2', permission="view")
 def index2(request):
     try:
         query = request.dbsession.query(models.IndexRecord)
@@ -27,6 +32,28 @@ def index2(request):
         return Response(db_err_msg, content_type='text/plain', status=500)
 
     return {"records": records}
+
+
+@view_config(route_name="post_something", request_method="POST")  # , permission="🕉")
+def post_something(request):
+    tmpdir = request.registry.settings["tmp_directory"]
+    file = request.POST['file']
+    local_dir = os.path.join(tmpdir, file.replace(".zip", ""))
+
+    if not os.path.exists(local_dir):
+        res = requests.get(
+            f"{request.registry.settings['static_base']}/Releases/{file}"
+        )
+        local_file = os.path.join(tmpdir, file)
+        with open(local_file, "wb") as f:
+            f.write(res.content)
+        with zipfile.ZipFile(local_file, "r") as f:
+            f.extractall(local_dir)
+
+    rc = ReleaseCreator(local_dir)
+    d = rc.process_local_dir()
+
+    return Response(body=json.dumps(d).encode(), content_type="application/json")
 
 
 @view_config(route_name='Releases')

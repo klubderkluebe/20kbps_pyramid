@@ -4,3 +4,5 @@ def includeme(config):
     config.add_route("index2", "/index2.htm")
     config.add_route("Releases", "/Releases/{rlsdir}/")
     config.add_route("Releases_with_subdir", "/Releases/{rlsdir}/{subdir}/")
+
+    config.add_route("post_something", "/post_something/")
