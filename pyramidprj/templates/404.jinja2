@@ -1,8 +1,26 @@
-{% extends "layout.jinja2" %}
-
-{% block content %}
-<div class="content">
-  <h1><span class="font-semi-bold">Pyramid</span> <span class="smaller">Starter project</span></h1>
-  <p class="lead"><span class="font-semi-bold">404</span> Page Not Found</p>
-</div>
-{% endblock content %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>20kbps | 404 not found</title>
+    <link rel="shortcut icon" href="{{static_base}}/favicon.ico" />
+  <style scoped>
+    @keyframes alternate {
+      0% {opacity: 0;}
+      50% {opacity: 1;}
+      100% {opacity: 0;}
+    }
+    .alternate-visibility {
+      animation-fill-mode: forwards;      
+      animation-name: alternate;
+      animation-duration: 1s;
+      animation-iteration-count: infinite;
+      animation-timing-function: step-end;
+    }
+  </style>
+  </head>
+  <body>
+    <img style="position:fixed;" src="{{request.static_url('pyramidprj:static/Pics/404_kincade.jpg') }}" />
+    <img style="position:fixed;" src="{{request.static_url('pyramidprj:static/Pics/404_1.png') }}" />
+    <img style="position:fixed;" src="{{request.static_url('pyramidprj:static/Pics/404_2.png') }}" class="alternate-visibility" />
+  </body>
+</html>
