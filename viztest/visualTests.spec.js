@@ -102,14 +102,11 @@ async function comparePages(path, afterNetworkIdleTimeout, viewportWidth, viewpo
 }
 
 
-test('compare index2.htm', async () => {
-    await comparePages('index2.htm', 1200, 540, 22000)
-})
-
+test('compare index.htm', async () => { await comparePages('/', 0, 800, 600) })
+test('compare index2.htm', async () => { await comparePages('index2.htm', 1200, 540, 22000) })
 
 for (let releaseDir of releaseDirs) {
     test(`compare ${releaseDir}`, async () => {
         await comparePages(`Releases/${releaseDir}`)
     })    
 }
-

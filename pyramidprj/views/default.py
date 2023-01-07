@@ -13,6 +13,11 @@ import logging
 log = logging.getLogger(__name__)
 
 
+@view_config(route_name="home", renderer="pyramidprj:templates/index.jinja2")
+def index(request):
+    return {}
+
+
 @view_config(route_name='index2', renderer='pyramidprj:templates/index2.jinja2')
 def index2(request):
     try:
