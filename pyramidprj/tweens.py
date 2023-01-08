@@ -1,7 +1,6 @@
 from urllib.parse import unquote, urlparse, urlunparse
 
 from bs4 import BeautifulSoup
-from cachetools import cached
 
 from pyramidprj import models
 
@@ -54,14 +53,6 @@ URL_ATTRIBUTES = {
 }
 
 
-def _get_doc_with_links_rewritten__keyfn(request, response, registry):
-    return request.path
-
-
-# Keeping these rewrites ephemeral was a design decision.
-# No need to execute them more than once for the same document though.
-#
-@cached(cache={}, key=_get_doc_with_links_rewritten__keyfn)
 def _get_doc_with_links_rewritten(request, response, registry):
     # The `resolve_release` middleware has added release to request, if found.
     release = getattr(request, "release", None)
