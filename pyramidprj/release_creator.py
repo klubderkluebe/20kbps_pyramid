@@ -229,6 +229,7 @@ class ReleaseCreator:
         except Exception as ex:
             self.task_state[RequestType.UPLOAD, file].success = False
             self.task_state[RequestType.UPLOAD, file].exception = ex
+            return
         
         self.task_state[RequestType.UPLOAD, file].success = True
 
