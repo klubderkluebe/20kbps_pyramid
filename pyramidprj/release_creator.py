@@ -113,8 +113,7 @@ class ReleaseCreator:
         self.queue.append(QueuedRequest(RequestType.PREVIEW, file))
 
     def request_upload(self, file: str):
-        preview_key = (RequestType.PREVIEW, file)
-        preview_state = self.task_state[preview_key]
+        preview_state = self.task_state[RequestType.PREVIEW, file]
         self.queue.append(QueuedRequest(RequestType.UPLOAD, data=preview_state.data))
 
     def process_zip_file(self, file):
