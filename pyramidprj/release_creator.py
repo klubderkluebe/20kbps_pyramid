@@ -124,6 +124,7 @@ class ReleaseCreator:
             res = requests.get(
                 f"{settings['static_base']}/Releases/{file}"
             )
+            assert res.status_code == 200, f"File download failed (res.status_code={res.status_code})"            
             log.info(f"ReleaseCreator.zip_downloaded | file='{file}'")
             local_file = os.path.join(tmpdir, file)
             with open(local_file, "wb") as f:
