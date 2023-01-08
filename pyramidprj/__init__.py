@@ -1,3 +1,5 @@
+import os
+
 from pyramid.authentication import BasicAuthAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
@@ -48,9 +50,20 @@ def notfound(request):
     return HTTPNotFound()
 
 
+def assert_tmpdir(tmpdir):
+    if not os.path.exists(tmpdir):
+        raise FileNotFoundError(f"`tmp_directory` specified in settings does not exist ('{tmpdir}')")
+    if not os.path.isdir(tmpdir):
+        raise NotADirectoryError(f"`tmp_directory` specified in settings is not a directory ('{tmpdir}')")
+    if not os.access(tmpdir, os.W_OK):
+        raise PermissionError(f"`tmp_directory` specified in settings is not writable ('{tmpdir}')")
+
+
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
+    assert_tmpdir(settings["tmp_directory"])
+
     with Configurator(settings=settings) as config:
 
         authn_policy = BasicAuthAuthenticationPolicy(check_credentials)
