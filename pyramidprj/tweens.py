@@ -10,6 +10,14 @@ import logging
 log = logging.getLogger(__name__)
 
 
+# rewrite_links middleware is applied to these routes only
+REWRITE_FOR_ROUTES = [
+    "index2",
+    "Releases",
+    "Releases_with_subdir",
+]
+
+
 LEGACY_STATIC_FILES = [
     "ico/yikis.jpg",
     "fav/rate_fav.ico",
@@ -120,7 +128,13 @@ def rewrite_links(request, response, registry):
     A lot of the imported HTML has URLs that must be rewritten.
     This middleware takes care of it after a view has been rendered to a response.
     """
-    if response.status_code != 200 or response.content_type != "text/html":
+    if response.status_code != 200:
+        return response
+
+    if (
+        request.matched_route is None
+        or request.matched_route.name not in REWRITE_FOR_ROUTES
+    ):
         return response
 
     response.body = _get_doc_with_links_rewritten(request, response, registry)
