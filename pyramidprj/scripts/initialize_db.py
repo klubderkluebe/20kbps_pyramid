@@ -377,7 +377,7 @@ def setup_index_records(dbsession):
 
         records.append(asdict)
 
-    for rec in records:
+    for rec in reversed(records):
         model = models.IndexRecord(
             date=rec["date"],
             body=rec["body"],

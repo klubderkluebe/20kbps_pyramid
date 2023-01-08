@@ -8,7 +8,7 @@ from pyramid.view import view_config
 from sqlalchemy.exc import SQLAlchemyError
 
 from .. import models
-from ..release_creator import RequestType, release_creator
+from ..release_creator import RequestType, get_release_creator
 
 import logging
 
@@ -23,7 +23,7 @@ def index(request):
 @view_config(route_name='index2', renderer='pyramidprj:templates/index2.jinja2')
 def index2(request):
     try:
-        query = request.dbsession.query(models.IndexRecord)
+        query = request.dbsession.query(models.IndexRecord).order_by(models.IndexRecord.id.desc())
         records = query.all()
     except SQLAlchemyError:
         return Response(db_err_msg, content_type='text/plain', status=500)
@@ -41,6 +41,7 @@ def request_preview(request):
     file = request.POST['file']
     key = (RequestType.PREVIEW, file)
 
+    release_creator = get_release_creator()
     task_state = release_creator.task_state.get(key)
     if task_state and task_state.success is None:
         raise exc.HTTPBadRequest("Preview task for '{file}' is already running")
@@ -58,6 +59,7 @@ def preview_release(request):
     file = request.matchdict["file"]
     key = (RequestType.PREVIEW, file)
 
+    release_creator = get_release_creator()
     task_state = release_creator.task_state.get(key)
     if task_state is None:
         raise exc.HTTPBadRequest(f"There is no preview task for '{file}'")
@@ -70,6 +72,7 @@ def request_upload(request):
     file = request.POST["file"]
     key = (RequestType.UPLOAD, file)
 
+    release_creator = get_release_creator()
     task_state = release_creator.task_state.get(key)
     if task_state and task_state.success is None:
         raise exc.HTTPBadRequest("Upload task for '{file}' is already running")
@@ -87,6 +90,7 @@ def check_upload(request):
     file = request.matchdict["file"]
     key = (RequestType.UPLOAD, file)
 
+    release_creator = get_release_creator()
     task_state = release_creator.task_state.get(key)
     if task_state is None:
         raise exc.HTTPBadRequest(f"There is no upload task for '{file}'")
@@ -99,6 +103,7 @@ def commit_release(request):
     file = request.POST["file"]
     key = (RequestType.UPLOAD, file)
 
+    release_creator = get_release_creator()
     task_state = release_creator.task_state.get(key)
     if task_state is None:
         raise exc.HTTPBadRequest(f"There is no upload task for '{file}'")

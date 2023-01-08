@@ -17,6 +17,7 @@ from pyramid.threadlocal import get_current_registry
 import mutagen
 import requests
 import zipfile
+from cachetools import cached
 from pathvalidate import validate_filename
 
 from . import models
@@ -273,4 +274,6 @@ class ReleaseCreator:
         dbsession.flush()
 
 
-release_creator = ReleaseCreator()
+@cached(cache={}, key=lambda: "🕉")
+def get_release_creator():
+    return ReleaseCreator()
