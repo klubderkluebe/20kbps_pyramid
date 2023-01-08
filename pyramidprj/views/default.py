@@ -18,12 +18,12 @@ import logging
 log = logging.getLogger(__name__)
 
 
-@view_config(route_name="home", renderer="pyramidprj:templates/index.jinja2", permission="🕉")
+@view_config(route_name="home", renderer="pyramidprj:templates/index.jinja2")
 def index(request):
     return {}
 
 
-@view_config(route_name='index2', renderer='pyramidprj:templates/index2.jinja2', permission="view")
+@view_config(route_name='index2', renderer='pyramidprj:templates/index2.jinja2')
 def index2(request):
     try:
         query = request.dbsession.query(models.IndexRecord)
@@ -34,8 +34,13 @@ def index2(request):
     return {"records": records}
 
 
-@view_config(route_name="post_something", request_method="POST")  # , permission="🕉")
-def post_something(request):
+@view_config(route_name="create_release", renderer="pyramidprj:templates/create_release.jinja2", permission="🕉")
+def create_release(request):
+    return {}
+
+
+@view_config(route_name="post_new_release_file", request_method="POST", renderer="pyramidprj:templates/post_new_release_file.jinja2", permission="🕉")
+def post_new_release_file(request):
     tmpdir = request.registry.settings["tmp_directory"]
     file = request.POST['file']
     local_dir = os.path.join(tmpdir, file.replace(".zip", ""))
@@ -50,10 +55,16 @@ def post_something(request):
         with zipfile.ZipFile(local_file, "r") as f:
             f.extractall(local_dir)
 
-    rc = ReleaseCreator(local_dir)
-    d = rc.process_local_dir()
+    data = ReleaseCreator(local_dir).process_local_dir()
+    request.session["new_release"] = data
+    return data
 
-    return Response(body=json.dumps(d).encode(), content_type="application/json")
+
+@view_config(route_name="confirm_new_release", request_method="POST", renderer="pyramidprj:templates/confirm_new_release.jinja2", permission="🕉")
+def confirm_new_release(request):
+    rc = ReleaseCreator.from_data(request.session["new_release"])
+    rc.create(request.dbsession, request.POST["release_page_content"], request.POST["index_record_body"])
+    return {}
 
 
 @view_config(route_name='Releases')

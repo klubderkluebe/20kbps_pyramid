@@ -5,4 +5,6 @@ def includeme(config):
     config.add_route("Releases", "/Releases/{rlsdir}/")
     config.add_route("Releases_with_subdir", "/Releases/{rlsdir}/{subdir}/")
 
-    config.add_route("post_something", "/post_something/")
+    config.add_route("create_release", "/create_release/")
+    config.add_route("post_new_release_file", "/post_new_release_file/")
+    config.add_route("confirm_new_release", "/confirm_new_release/")

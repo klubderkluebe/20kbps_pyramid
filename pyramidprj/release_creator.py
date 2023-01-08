@@ -4,9 +4,16 @@ import os.path
 import re
 import unicodedata
 from datetime import datetime
-from pathvalidate import validate_filename
 
 import mutagen
+from pathvalidate import validate_filename
+
+from . import models
+from .storage_client import get_storage_client
+
+import logging
+
+log = logging.getLogger(__name__)
 
 
 MUSIC_EXTENSIONS = ("mp3", "ogg", "opus",)
@@ -40,8 +47,15 @@ class ReleaseCreator:
         self.local_dir = local_dir
         self.data = {}
 
+    @classmethod
+    def from_data(cls, data: dict):
+        rc = ReleaseCreator(data["local_dir"])
+        rc.data = data
+        return rc
+
     def process_local_dir(self):
         self.data = {
+            "local_dir": self.local_dir,
             "catalog_no": ptn_catno.search(self.local_dir).groups()[0],  # type: ignore
             "file": os.path.basename(f"{self.local_dir}.zip"),
         }
@@ -88,6 +102,7 @@ class ReleaseCreator:
             del pf["_artist"]
 
         self.data.update({
+            "local_files": music_files,
             "release_dir": os.path.join(sanitize(artist.lower()), sanitize(album.lower())),
             "release_data": {
                 "relname": album,
@@ -101,3 +116,43 @@ class ReleaseCreator:
         })
 
         return self.data
+
+    def create(self, dbsession, page_content, index_record_body):
+        storage = get_storage_client()
+        remote_rlsdir = os.path.join("Releases", self.data["release_dir"])
+
+        if not storage.exists(os.path.join(remote_rlsdir, "cover.jpg")):
+            for local, pf in zip(self.data["local_files"], self.data["player_files"]):
+                remote = os.path.join(remote_rlsdir, pf["file"])
+                storage.upload(local, remote)
+            storage.upload(
+                os.path.join(self.data["local_dir"], "cover.jpg"),
+                os.path.join(remote_rlsdir, "cover.jpg")
+            )
+
+        release = models.Release(
+            catalog_no=self.data["catalog_no"],
+            release_dir=self.data["release_dir"],
+            file=self.data["file"],
+            release_data=self.data["release_data"],
+        )
+        dbsession.add(release)
+        dbsession.flush()
+
+        rp = models.ReleasePage(
+            release=release,
+            content=page_content,
+        )
+        dbsession.add(rp)
+        dbsession.flush()
+
+        for pf in self.data["player_files"]:
+            pf = models.PlayerFile(
+                release_page=rp,
+                file=pf["file"],
+                number=pf["number"],
+                title=pf["title"],
+                duration_secs=pf["duration_secs"],
+            )
+            dbsession.add(pf)
+        dbsession.flush()

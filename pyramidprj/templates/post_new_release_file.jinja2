@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{{ release_data.relname }}</title>
+</head>
+<body>
+    <p>
+        Check the release data below. When o.k., enter release page content and index record body (both HTML) below, and press <i>Submit</i>.
+        This will
+    </p>
+    <ul>
+        <li>create the release (pseudo-)directory in static asset storage (under <i>Releases</i>)</li>
+        <li>copy the audio files and <i>cover.jpg</i> to static asset storage (prefix: <i>Releases/{{release_dir}}/</i>)</li>
+        <li>create the database objects</li>
+    </ul>
+    <p><b>The release will be public immediately.</b></p>
+
+    <form method="POST" action="/confirm_new_release/">
+        <label for="release_page_content">Release Page Content:</label><br>
+        <textarea name="release_page_content" rows="10" cols="100"></textarea><br>
+        <label for="index_record_body">Index Record Body:</label><br>
+        <textarea name="index_record_body" rows="10" cols="100"></textarea><br><br>
+        <input type="submit" value="Submit">
+    </form> 
+
+    <hr/>
+
+	<h1>{{ release_data.relname }}</h1>
+	<h2>by {{ release_data.artist }}</h2>
+	<p>Catalog number: {{ release_data['cat-no'] }}</p>
+	<p>File: {{ file }}</p>
+	<p>Release directory: {{ release_dir }}</p>
+	<p>Description: {{ release_data.description }}</p>
+	<h3>Track List</h3>
+	<ol>
+		{% for track in player_files %}
+		<li>{{ track.title }} ({{ track.duration_secs }} seconds)</li>
+		{% endfor %}
+	</ol>
+	<p>Released on {{ release_data.date }}</p>
+</body>
+</html>

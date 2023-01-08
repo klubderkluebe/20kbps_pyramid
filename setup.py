@@ -27,6 +27,8 @@ requires = [
     "html5lib",
     "requests",
     "pathvalidate",
+    "google-cloud-storage",
+    "pyramid_nacl_session",
 ]
 
 tests_require = [

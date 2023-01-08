@@ -14,6 +14,8 @@ from pyramid.security import forget
 from pyramid.view import forbidden_view_config
 from pyramid.view import view_config
 
+from . import models
+
 
 @forbidden_view_config()
 def forbidden_view(request):
@@ -56,6 +58,7 @@ def main(global_config, **settings):
         config.set_authorization_policy(ACLAuthorizationPolicy())
         config.set_root_factory(lambda request: Root())
 
+        config.include('pyramid_nacl_session')        
         config.include('pyramid_jinja2')
         config.include('.routes')
         config.include('.models')
