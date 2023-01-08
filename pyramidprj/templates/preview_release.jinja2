@@ -4,7 +4,7 @@
 	<title>Preview release</title>
 </head>
 <body>
-    {% if success == False %}
+    {% if success == false %}
         <p>There was an error creating the preview.</p>
         <pre>{{exception.__str__()}}</pre>
     {% elif success is none %}
