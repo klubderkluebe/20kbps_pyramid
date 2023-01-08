@@ -211,15 +211,18 @@ class ReleaseCreator:
 
     def upload_player_files(self, file):
         data = self.task_state[RequestType.UPLOAD, file].data
+        data["completed_uploads"] = []
 
         try:
             storage = get_storage_client()
             remote_rlsdir = os.path.join("Releases", data["release_dir"])
+            completed_uploads = []
             for local, pf in zip(data["local_files"], data["player_files"]):
                 remote = os.path.join(remote_rlsdir, pf["file"])
                 log.info(f"ReleaseCreator.upload_player_file | local='{local}' | remote='{remote}'")
                 storage.upload(local, remote)
-                time.sleep(0)                
+                data["completed_uploads"].append({"from": local, "to": remote})
+                time.sleep(0)
             storage.upload(
                 os.path.join(data["local_dir"], "cover.jpg"),
                 os.path.join(remote_rlsdir, "cover.jpg")
