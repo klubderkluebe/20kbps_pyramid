@@ -212,8 +212,6 @@ class ReleaseCreator:
     def upload_player_files(self, file):
         data = self.task_state[RequestType.UPLOAD, file].data
 
-        log.info(f"upload_player_files | data={data}")
-
         try:
             storage = get_storage_client()
             remote_rlsdir = os.path.join("Releases", data["release_dir"])
