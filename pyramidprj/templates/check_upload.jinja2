@@ -20,12 +20,11 @@
         </p>
         <form method="POST" action="/commit_release/">
             <input type="hidden" name="file" value="{{data.file}}" />
-            <label for="page_content">Release Page Content:</label><br>
-            <textarea name="page_content" rows="10" cols="100"></textarea><br>
-            <label for="index_record_body">Index Record Body:</label><br>
-            <textarea name="index_record_body" rows="10" cols="100">
-            {{data.release_data.description}} (<a href="/Releases/{{data.release_dir}}/">release page</a>) (<a href="/Releases/{{data.file}}">zip</a>)
-            </textarea><br><br>
+            <label for="page_content">Release Page Content:</label><br/>
+            <textarea name="page_content" rows="10" cols="100"></textarea><br/>
+            <label for="index_record_body">Index Record Body:</label><br/>
+            <textarea name="index_record_body" rows="10" cols="100">{{data.release_data.description}} (<a href="/Releases/{{data.release_dir}}/">release page</a>) (<a href="/Releases/{{data.file}}">zip</a>)</textarea>
+            <br/><br/>
             <input type="submit" value="Submit">            
         </form>
     {% endif %}
