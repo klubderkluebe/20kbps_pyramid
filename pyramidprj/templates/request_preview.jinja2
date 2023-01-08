@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Request preview</title>
+</head>
+<body>
+  {% with preview_url = '/preview_release/' + file + '/' %}
+    <p>A preview for <i>{{file}}</i> has been requested.</p>
+    <p>Go to <a href="{{preview_url}}">{{preview_url}}</a> to see the preview and upload the release.</p>
+  {% endwith %}
+</body>
+</html>

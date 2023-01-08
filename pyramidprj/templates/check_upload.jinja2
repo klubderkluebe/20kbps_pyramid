@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Check upload</title>
+</head>
+<body>
+
+    {% if success == False %}
+        <p>There was an error uploading the files.</p>
+        <pre>{{exception.__str__()}}</pre>
+    {% elif success is none %}
+        <p>The upload is still pending. Reload this page after a little while.</p>
+    {% else %}
+        <p>
+            The upload has succeeded. Enter release page content and index record body,
+            and press <i>Submit</i> to create the database objects.
+        </p>
+        <p>
+            <b>The release will be public after this step.</b>
+        </p>
+        <form method="POST" action="/commit_release/">
+            <input type="hidden" name="file" value="{{data.file}}" />
+            <label for="page_content">Release Page Content:</label><br>
+            <textarea name="page_content" rows="10" cols="100"></textarea><br>
+            <label for="index_record_body">Index Record Body:</label><br>
+            <textarea name="index_record_body" rows="10" cols="100"></textarea><br><br>
+            <input type="submit" value="Submit">            
+        </form>
+    {% endif %}
+
+</body>
+</html>
+
+

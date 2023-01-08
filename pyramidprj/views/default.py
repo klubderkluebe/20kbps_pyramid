@@ -7,11 +7,8 @@ from pyramid.response import FileResponse, Response
 from pyramid.view import view_config
 from sqlalchemy.exc import SQLAlchemyError
 
-import requests
-import zipfile
-
 from .. import models
-from ..release_creator import ReleaseCreator
+from ..release_creator import RequestType, release_creator
 
 import logging
 
@@ -39,32 +36,86 @@ def create_release(request):
     return {}
 
 
-@view_config(route_name="post_new_release_file", request_method="POST", renderer="pyramidprj:templates/post_new_release_file.jinja2", permission="🕉")
-def post_new_release_file(request):
-    tmpdir = request.registry.settings["tmp_directory"]
+@view_config(route_name="request_preview", request_method="POST", renderer="pyramidprj:templates/request_preview.jinja2", permission="🕉")
+def request_preview(request):    
     file = request.POST['file']
-    local_dir = os.path.join(tmpdir, file.replace(".zip", ""))
+    key = (RequestType.PREVIEW, file)
 
-    if not os.path.exists(local_dir):
-        res = requests.get(
-            f"{request.registry.settings['static_base']}/Releases/{file}"
-        )
-        local_file = os.path.join(tmpdir, file)
-        with open(local_file, "wb") as f:
-            f.write(res.content)
-        with zipfile.ZipFile(local_file, "r") as f:
-            f.extractall(local_dir)
+    task_state = release_creator.task_state.get(key)
+    if task_state and task_state.success is None:
+        raise exc.HTTPBadRequest("Preview task for '{file}' is already running")
 
-    data = ReleaseCreator(local_dir).process_local_dir()
-    request.session["new_release"] = data
+    if task_state:
+        del release_creator.task_state[key]
+
+    release_creator.request_preview(file)
+
+    return {"file": file}
+
+
+@view_config(route_name="preview_release", renderer="pyramidprj:templates/preview_release.jinja2", permission="🕉")
+def preview_release(request):
+    file = request.matchdict["file"]
+    key = (RequestType.PREVIEW, file)
+
+    task_state = release_creator.task_state.get(key)
+    if task_state is None:
+        raise exc.HTTPBadRequest(f"There is no preview task for '{file}'")
+
+    return task_state.serialize()
+
+
+@view_config(route_name="request_upload", request_method="POST", renderer="pyramidprj:templates/request_upload.jinja2", permission="🕉")
+def request_upload(request):    
+    file = request.POST["file"]
+    key = (RequestType.UPLOAD, file)
+
+    task_state = release_creator.task_state.get(key)
+    if task_state and task_state.success is None:
+        raise exc.HTTPBadRequest("Upload task for '{file}' is already running")
+
+    if task_state:
+        del release_creator.task_state[key]
+
+    release_creator.request_upload(file)
+
+    return {"file": file}
+
+
+@view_config(route_name="check_upload", renderer="pyramidprj:templates/check_upload.jinja2", permission="🕉")
+def check_upload(request):
+    file = request.matchdict["file"]
+    key = (RequestType.UPLOAD, file)
+
+    task_state = release_creator.task_state.get(key)
+    if task_state is None:
+        raise exc.HTTPBadRequest(f"There is no upload task for '{file}'")
+
+    return task_state.serialize()
+
+
+@view_config(route_name="commit_release", request_method="POST", renderer="pyramidprj:templates/commit_release.jinja2", permission="🕉")
+def commit_release(request):    
+    file = request.POST["file"]
+    key = (RequestType.UPLOAD, file)
+
+    task_state = release_creator.task_state.get(key)
+    if task_state is None:
+        raise exc.HTTPBadRequest(f"There is no upload task for '{file}'")
+
+    if task_state.success is None:
+        raise exc.HTTPBadRequest(f"The upload is still pending.")
+
+    release_creator.create_database_objects(
+        file,
+        request.dbsession,
+        request.POST["page_content"],
+        request.POST["index_record_body"]
+    )
+
+    data = task_state.serialize()
+    del release_creator.task_state[key]
     return data
-
-
-@view_config(route_name="confirm_new_release", request_method="POST", renderer="pyramidprj:templates/confirm_new_release.jinja2", permission="🕉")
-def confirm_new_release(request):
-    rc = ReleaseCreator.from_data(request.session["new_release"])
-    rc.create(request.dbsession, request.POST["release_page_content"], request.POST["index_record_body"])
-    return {}
 
 
 @view_config(route_name='Releases')

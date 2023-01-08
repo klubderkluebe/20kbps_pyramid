@@ -6,5 +6,8 @@ def includeme(config):
     config.add_route("Releases_with_subdir", "/Releases/{rlsdir}/{subdir}/")
 
     config.add_route("create_release", "/create_release/")
-    config.add_route("post_new_release_file", "/post_new_release_file/")
-    config.add_route("confirm_new_release", "/confirm_new_release/")
+    config.add_route("request_preview", "/request_preview/")
+    config.add_route("preview_release", "/preview_release/{file}/")
+    config.add_route("request_upload", "/request_upload/")
+    config.add_route("check_upload", "/check_upload/{file}/")
+    config.add_route("commit_release", "/commit_release/")

@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Commit release</title>
+</head>
+<body>
+  {% with release_url = '/Releases/' + data.release_dir + '/' %}
+    <p>The release has been committed and is now live.</p>
+    <p>Go to <a href="{{release_url}}">{{release_url}}</a> to see it.</p>
+    <p>Go to <a href="/index2.htm">/index2.htm</a> to see the index record that was added for it.</p>
+  {% endwith %}
+</body>
+</html>
