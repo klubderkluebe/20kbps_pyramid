@@ -15,6 +15,8 @@ from sqlalchemy.orm import (
 
 from .meta import Base
 
+from bs4 import BeautifulSoup
+
 
 index_record_releases = Table(
     "index_record_releases",
@@ -67,6 +69,12 @@ class ReleasePage(Base):
     custom_tracklist = Column(Text,
         comment="Some releases have a list.inc.php file."
     )
+
+    @property
+    def content_text(self):
+        html = t.cast(str, self.content or self.custom_body)
+        soup = BeautifulSoup(html, "html5lib")
+        return soup.text
 
 
 class PlayerFile(Base):

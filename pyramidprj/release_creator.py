@@ -40,7 +40,7 @@ VARIOUS_ARTISTS_NAME = "VA"
 SANITIZE_ALPHABET = ".-_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 SANITIZE_MAXLEN = 255
 
-ptn_catno = re.compile(r"\((20k.*?)\)")
+ptn_catno = re.compile(r"\((.*?)\)$")
 ptn_tag = re.compile(r"[\dA-Z]{4}")
 
 

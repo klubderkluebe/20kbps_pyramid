@@ -29,6 +29,8 @@ requires = [
     "pathvalidate",
     "google-cloud-storage",
     "pyramid_nacl_session",
+    "internetarchive",
+    "shortuuid",
 ]
 
 tests_require = [
