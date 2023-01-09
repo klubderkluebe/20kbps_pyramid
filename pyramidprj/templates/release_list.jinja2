@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Release list</title>
+  <style>
+    .row:hover {
+      background-color: palegreen;
+    }
+  </style>
+</head>
+<body>
+  <table>
+  {% for r in releases %}
+    <tr class="row">
+      <td>{{r.catalog_no}}</td>
+      <td>
+        {% if r.release_dir %}
+          <a href="/Releases/{{r.release_dir}}/">{{r.release_dir}}</a>
+        {% else %}
+          <span>{{r.file.replace('.zip', '').replace('.ZIP', '').replace('.rar', '').replace('.RAR', '')}}</span>
+        {% endif %}
+      </td>
+      <td><a href="/edit/{{r.id}}/">Edit</a></td>
+      <td><button onclick="deleteRelease({{r.id}}, '{{r.catalog_no}}', '{{r.release_dir}}')">Delete</button></td>
+    </tr>
+  {% endfor %}
+  </table>
+  <script>
+    async function deleteRelease(id, catalog_no, release_dir) {
+      const sure = confirm(`Delete ${catalog_no}. Are you sure?\n\nThis will delete the database objects, but not the static assets.`)
+      if (sure) {
+        const res = await fetch(
+          `/Releases/${release_dir}/`,
+          {
+            method: 'DELETE',
+            headers: {
+              'Authorization': '{{authorization}}',
+            }
+          }
+        )
+        if (res.status === 204) {
+          location.reload()
+        } else {
+          alert(`Error deleting ${catalog_no} (${res.status} ${res.statusText})`)
+        }
+      }      
+    }
+  </script>
+</body>
+</html>

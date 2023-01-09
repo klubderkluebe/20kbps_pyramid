@@ -11,3 +11,5 @@ def includeme(config):
     config.add_route("request_upload", "/request_upload/")
     config.add_route("check_upload", "/check_upload/{file}/")
     config.add_route("commit_release", "/commit_release/")
+
+    config.add_route("release_list", "/releases/")

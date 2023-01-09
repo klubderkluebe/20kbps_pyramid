@@ -12,7 +12,9 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import IntEnum
 
+import transaction
 from pyramid.threadlocal import get_current_registry
+from sqlalchemy.sql.expression import func
 
 import mutagen
 import requests
@@ -82,7 +84,7 @@ class TaskState:
         }
 
 
-class ReleaseCreator:
+class ReleaseService:
     def __init__(self):
         self.queue: deque[QueuedRequest] = deque()
         self.task_state: t.Dict[t.Tuple[RequestType, str], TaskState] = {}
@@ -234,7 +236,7 @@ class ReleaseCreator:
         
         self.task_state[RequestType.UPLOAD, file].success = True
 
-    def create_database_objects(self, file, dbsession, page_content, index_record_body):
+    def create_database_objects(self, dbsession, file, page_content, index_record_body):
         data = self.task_state[RequestType.UPLOAD, file].data
 
         release = models.Release(
@@ -273,9 +275,29 @@ class ReleaseCreator:
             releases=[release],
         )
         dbsession.add(ir)
-        dbsession.flush()
 
+    def delete_database_objects(self, dbsession, release_id):
+        release = dbsession.query(models.Release).filter(models.Release.id == release_id).one()
+
+        # An index record can be associated with multiple releases. This won't be the case for new
+        # index records, but there are a few legacy index records that refer to multiple releases. 
+        # Delete only index records where this release is the only release referred to.
+        q = (
+            dbsession.query(models.IndexRecord)
+            .filter(models.IndexRecord.releases.contains(release))
+            .join(models.IndexRecord.releases)
+            .group_by(models.IndexRecord.id)
+            .having(func.count(models.Release.id) == 1)
+            .with_entities(models.IndexRecord.id)
+        )
+        index_record_ids = [ir.id for ir in q]
+        dbsession.query(models.IndexRecord).filter(models.IndexRecord.id.in_(index_record_ids)).delete()
+            
+        if release.release_page:
+            dbsession.query(models.PlayerFile).filter(models.PlayerFile.release_page_id == release.release_page.id).delete()
+            dbsession.release_page.delete()
+        
 
 @cached(cache={}, key=lambda: "🕉")
-def get_release_creator():
-    return ReleaseCreator()
+def get_release_service():
+    return ReleaseService()
