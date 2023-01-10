@@ -9,7 +9,7 @@
         <p>There was an error uploading the files.</p>
         <pre>{{exception.__str__()}}</pre>
     {% elif success is none %}
-        <p>The upload is still pending. Reload this page after a little while.</p>
+        <p>The upload is still in progress. Reload this page after a little while.</p>
         <p>Completed uploads: ({{data.completed_uploads|length}} / {{data.local_files|length}})</p>
         <ul>
             {% for c in data.completed_uploads %}

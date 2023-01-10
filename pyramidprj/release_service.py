@@ -14,6 +14,9 @@ from enum import IntEnum
 
 import transaction
 from pyramid.threadlocal import get_current_registry
+from sqlalchemy import engine_from_config
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.sql.expression import func
 
 import mutagen
@@ -23,6 +26,7 @@ from cachetools import cached
 from pathvalidate import validate_filename
 
 from . import models
+from .archive_org_client import ArchiveOrgClient
 from .storage_client import get_storage_client
 
 import logging
@@ -61,6 +65,7 @@ def sanitize(s):
 class RequestType(IntEnum):
     PREVIEW = 0
     UPLOAD = 1
+    IA_UPLOAD = 2  # Internet Archive upload
 
 
 @dataclass
@@ -110,6 +115,12 @@ class ReleaseService:
                         file: str = data["file"]
                         self.task_state[RequestType.UPLOAD, file] = TaskState(data=data)
                         self.upload_player_files(file)
+                    case RequestType.IA_UPLOAD:
+                        file = t.cast(str, req.file)
+                        self.task_state[RequestType.IA_UPLOAD, file] = TaskState()
+                        local_dir = self.process_zip_file(file, reuse_existing=True)
+                        if local_dir:
+                            self.upload_to_ia(file, local_dir)
 
     def request_preview(self, file: str):
         self.queue.append(QueuedRequest(RequestType.PREVIEW, file))
@@ -118,9 +129,18 @@ class ReleaseService:
         preview_state = self.task_state[RequestType.PREVIEW, file]
         self.queue.append(QueuedRequest(RequestType.UPLOAD, data=preview_state.data))
 
-    def process_zip_file(self, file):
+    def request_ia_upload(self, file: str):
+        self.queue.append(QueuedRequest(RequestType.IA_UPLOAD, file))
+
+    def process_zip_file(self, file, reuse_existing=False):
         tmpdir = settings["tmp_directory"]
         local_dir = os.path.join(tmpdir, file.replace(".zip", ""))
+
+        if (
+            reuse_existing
+            and os.path.exists(os.path.join(local_dir, "cover.jpg"))
+        ):
+            return local_dir
 
         try:
             res = requests.get(
@@ -235,6 +255,27 @@ class ReleaseService:
             return
         
         self.task_state[RequestType.UPLOAD, file].success = True
+
+    def upload_to_ia(self, file, local_dir):
+        data = self.task_state[RequestType.IA_UPLOAD, file].data
+
+        try:
+            engine = engine_from_config(settings, prefix='sqlalchemy.')
+            session = sessionmaker(bind=engine)()
+            release = session.query(models.Release).filter(models.Release.file == file).one()
+            identifier = ArchiveOrgClient().upload_release(release, local_dir, True)  # TODO: remove use_uuid=True
+        except Exception as ex:
+            self.task_state[RequestType.IA_UPLOAD, file].success = False
+            self.task_state[RequestType.IA_UPLOAD, file].exception = ex
+            return
+        
+        release.release_data["archive"] = f"https://archive.org/details/{identifier}"
+        flag_modified(release, "release_data")
+        session.add(release)
+        session.commit()
+
+        data["identifier"] = identifier
+        self.task_state[RequestType.IA_UPLOAD, file].success = True
 
     def create_database_objects(self, dbsession, file, page_content, index_record_body):
         data = self.task_state[RequestType.UPLOAD, file].data

@@ -70,15 +70,15 @@ def request_preview(request):
     file = request.POST['file']
     key = (RequestType.PREVIEW, file)
 
-    release_creator = get_release_service()
-    task_state = release_creator.task_state.get(key)
+    release_service = get_release_service()
+    task_state = release_service.task_state.get(key)
     if task_state and task_state.success is None:
         raise exc.HTTPBadRequest("Preview task for '{file}' is already running")
 
     if task_state:
-        del release_creator.task_state[key]
+        del release_service.task_state[key]
 
-    release_creator.request_preview(file)
+    release_service.request_preview(file)
 
     return {"file": file}
 
@@ -88,8 +88,8 @@ def preview_release(request):
     file = request.matchdict["file"]
     key = (RequestType.PREVIEW, file)
 
-    release_creator = get_release_service()
-    task_state = release_creator.task_state.get(key)
+    release_service = get_release_service()
+    task_state = release_service.task_state.get(key)
     if task_state is None:
         raise exc.HTTPBadRequest(f"There is no preview task for '{file}'")
 
@@ -101,15 +101,15 @@ def request_upload(request):
     file = request.POST["file"]
     key = (RequestType.UPLOAD, file)
 
-    release_creator = get_release_service()
-    task_state = release_creator.task_state.get(key)
+    release_service = get_release_service()
+    task_state = release_service.task_state.get(key)
     if task_state and task_state.success is None:
         raise exc.HTTPBadRequest("Upload task for '{file}' is already running")
 
     if task_state:
-        del release_creator.task_state[key]
+        del release_service.task_state[key]
 
-    release_creator.request_upload(file)
+    release_service.request_upload(file)
 
     return {"file": file}
 
@@ -119,8 +119,8 @@ def check_upload(request):
     file = request.matchdict["file"]
     key = (RequestType.UPLOAD, file)
 
-    release_creator = get_release_service()
-    task_state = release_creator.task_state.get(key)
+    release_service = get_release_service()
+    task_state = release_service.task_state.get(key)
     if task_state is None:
         raise exc.HTTPBadRequest(f"There is no upload task for '{file}'")
 
@@ -132,15 +132,15 @@ def commit_release(request):
     file = request.POST["file"]
     key = (RequestType.UPLOAD, file)
 
-    release_creator = get_release_service()
-    task_state = release_creator.task_state.get(key)
+    release_service = get_release_service()
+    task_state = release_service.task_state.get(key)
     if task_state is None:
         raise exc.HTTPBadRequest(f"There is no upload task for '{file}'")
 
     if task_state.success is None:
         raise exc.HTTPBadRequest(f"The upload is still pending.")
 
-    release_creator.create_database_objects(
+    release_service.create_database_objects(
         request.dbsession,
         file,
         request.POST["page_content"],
@@ -148,11 +148,43 @@ def commit_release(request):
     )
 
     data = task_state.serialize()
-    del release_creator.task_state[key]
+    del release_service.task_state[key]
     return data
 
 
+@view_config(route_name="request_iaupload", request_method="POST", permission="🕉")
+def request_iaupload(request):
+    file = request.POST["file"]
+    key = (RequestType.IA_UPLOAD, file)
+
+    release_service = get_release_service()
+    task_state = release_service.task_state.get(key)
+    if task_state and task_state.success is None:
+        raise exc.HTTPBadRequest("Archive.org upload task for '{file}' is already running")
+
+    if task_state:
+        del release_service.task_state[key]
+
+    release_service.request_ia_upload(file)
+
+    return exc.HTTPNoContent()
+
+
+@view_config(route_name="check_iaupload", renderer="pyramidprj:templates/check_iaupload.jinja2", permission="🕉")
+def check_iaupload(request):
+    file = request.matchdict["file"]
+    key = (RequestType.IA_UPLOAD, file)
+
+    release_service = get_release_service()
+    task_state = release_service.task_state.get(key)
+    if task_state is None:
+        raise exc.HTTPBadRequest(f"There is no archive.org upload task for '{file}'")
+
+    return task_state.serialize()
+
+
 @view_config(route_name="release_list", renderer="pyramidprj:templates/release_list.jinja2", permission="🕉")
+@view_config(route_name="Release_list", renderer="pyramidprj:templates/release_list.jinja2", permission="🕉")
 def release_list(request):
     releases = request.dbsession.query(models.Release).order_by(models.Release.id.desc())
     return {
@@ -178,6 +210,7 @@ def release_edit(request):
     release = request.dbsession.query(models.Release).filter(models.Release.id == release_id).one()    
     return {
         "release": release,
+        "authorization": request.headers["Authorization"],
         "dumps": json.dumps,
     }
 

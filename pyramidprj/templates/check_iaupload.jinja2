@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Check archive.org upload</title>
+</head>
+<body>
+
+    {% if success == false %}
+        <p>There was an error uploading the files.</p>
+        <pre>{{exception.__str__()}}</pre>
+    {% elif success is none %}
+        <p>The archive.org upload is in progress. Reload this page after a little while.</p>
+    {% else %}
+        {% with 
+            item_url = 'https://archive.org/details/' + data.identifier
+            hist_url = 'https://catalogd.archive.org/history/' + data.identifier
+        %}
+            <p>The upload has succeeded.</p>
+            <p>The item will be available at <a href="{{item_url}}">{{item_url}}</a>.</p>
+            <p>
+                It can take a little while for the item to become available.
+                You can check its status at <a href="{{hist_url}}">{{hist_url}}</a>
+            </p>
+        {% endwith %}
+    {% endif %}
+
+</body>
+</html>

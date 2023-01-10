@@ -5,6 +5,10 @@
 </head>
 <body>
 
+    <div style="display:block; text-align:right;">
+        <button onclick="uploadToArchiveOrg()">Upload to archive.org</button>
+    </div>
+
     <form method="post" action="/update_release/">
     <input type="hidden" name="release_id" value="{{release.id}}" />
 
@@ -33,6 +37,50 @@
 
     <input type="submit" value="Submit">
     </form> 
+
+    <script>
+        async function uploadToArchiveOrg() {
+            const textarea = document.querySelector('[name="release_data"]')
+            const releaseData = JSON.parse(textarea.value)
+            let message = (
+                "This action will create a new item on archive.org and upload this release's "
+                + "audio files and cover to it. The item's description will be the text content of "
+                + "the release page's content or custom body.\n\n"
+                + "If at a later point you make changes to the release data or page content, "
+                + "those changes will have to be mirrored to archive.org manually, so make sure "
+                + "you only upload to archive.org when everything is correct.\n\n"                
+            )
+            if (!!releaseData.archive) {
+                message += (
+                    "It looks like the release data already has a archive URL. Uploading the release "
+                    + "again will *not* have the effect of updating the content of the same archive.org item. "
+                    + "Please proceed only if you know that what you are doing is correct.\n\n"
+                )
+            }
+            message += "Are you sure you want to upload the release to archive.org now?"
+
+            if (!confirm(message)) return;
+
+            const formData = new FormData()
+            formData.append('file', '{{release.file}}')
+
+            const res = await fetch(
+                `/request_iaupload/`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': '{{authorization}}',
+                    },
+                    body: formData,
+                }                    
+            )
+            if (res.status === 204) {
+                location.href = '/check_iaupload/{{release.file}}/'
+            } else {
+                alert(`Error requesting archive.org upload of {{release.catalog_no}} (${res.status} ${res.statusText})`)
+            }
+        }
+    </script>
 
 </body>
 </html>

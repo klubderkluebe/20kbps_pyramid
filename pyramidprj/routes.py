@@ -11,7 +11,10 @@ def includeme(config):
     config.add_route("request_upload", "/request_upload/")
     config.add_route("check_upload", "/check_upload/{file}/")
     config.add_route("commit_release", "/commit_release/")
+    config.add_route("request_iaupload", "/request_iaupload/")
+    config.add_route("check_iaupload", "/check_iaupload/{file}/")
 
     config.add_route("release_list", "/releases/")
+    config.add_route("Release_list", "/Releases/")
     config.add_route("release_edit", "/edit/{release_id}/")
     config.add_route("update_release", "/update_release/")

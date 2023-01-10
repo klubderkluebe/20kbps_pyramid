@@ -72,7 +72,7 @@ class ReleasePage(Base):
 
     @property
     def content_text(self):
-        html = t.cast(str, self.content or self.custom_body)
+        html = t.cast(str, self.custom_body or self.content)
         soup = BeautifulSoup(html, "html5lib")
         return soup.text
 
