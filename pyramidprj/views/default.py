@@ -169,7 +169,7 @@ def delete_release(request):
         raise exc.HTTPBadGateway("No such release")
 
     get_release_service().delete_database_objects(request.dbsession, release.id)
-    return Response(status_code=204)  # raise exc.HTTPNoContent would not commit the session
+    return exc.HTTPNoContent()
 
 
 @view_config(route_name="release_edit", renderer="pyramidprj:templates/release_edit.jinja2", permission="🕉")
