@@ -172,6 +172,40 @@ def delete_release(request):
     return Response(status_code=204)  # raise exc.HTTPNoContent would not commit the session
 
 
+@view_config(route_name="release_edit", renderer="pyramidprj:templates/release_edit.jinja2", permission="🕉")
+def release_edit(request):
+    release_id = int(request.matchdict["release_id"])
+    release = request.dbsession.query(models.Release).filter(models.Release.id == release_id).one()    
+    return {
+        "release": release,
+        "dumps": json.dumps,
+    }
+
+
+@view_config(route_name="update_release", request_method="POST", renderer="pyramidprj:templates/update_release.jinja2", permission="🕉")
+def update_release(request):
+    release_id = int(request.POST["release_id"])
+    release_data = json.loads(request.POST["release_data"]) if request.POST["release_data"] else None
+    page_content = request.POST["page_content"].strip() or None
+    custom_body = request.POST["custom_body"].strip() or None
+    index_record_bodies = {}
+    for k in [k for k in request.POST.keys() if k.startswith("index_record_body")]:
+        ir_id = int(k.split("__")[1])
+        index_record_bodies[ir_id] = request.POST[k].strip() or None
+
+    if release_data:
+        release = request.dbsession.query(models.Release).filter(models.Release.id == release_id).one()
+        release.release_data = release_data
+        release.release_page.content = page_content
+        release.release_page.custom_body = custom_body
+
+        for ir_id, body in index_record_bodies.items():
+            ir = request.dbsession.query(models.IndexRecord).filter(models.IndexRecord.id == ir_id).one()
+            ir.body = body
+
+    return exc.HTTPTemporaryRedirect(f"/edit/{release_id}/")
+
+
 db_err_msg = """\
 Pyramid is having a problem using your SQL database.  The problem
 might be caused by one of the following things:

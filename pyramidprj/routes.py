@@ -13,3 +13,5 @@ def includeme(config):
     config.add_route("commit_release", "/commit_release/")
 
     config.add_route("release_list", "/releases/")
+    config.add_route("release_edit", "/edit/{release_id}/")
+    config.add_route("update_release", "/update_release/")

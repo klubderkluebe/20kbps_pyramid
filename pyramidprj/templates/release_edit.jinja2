@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Release edit</title>
+</head>
+<body>
+
+    <form method="post" action="/update_release/">
+    <input type="hidden" name="release_id" value="{{release.id}}" />
+
+{% if release.release_page %}
+    <label for="release_data">Release Data:</label><br/>
+    <small>Edit this JSON to e.g. provide the full Discogs release URL in the <i>"discogs"</i> key.</small><br/>
+    <textarea name="release_data" rows="10" cols="100">{{dumps(release.release_data, indent=4)|safe if release.release_data else ''}}</textarea><br/>
+
+    <label for="page_content">Page Content:</label><br/>
+    <small>The page content is what is displayed between the cover and the tracklist.</small><br/>
+    <textarea name="page_content" rows="10" cols="100">{{release.release_page.content|safe if release.release_page.content else ''}}</textarea><br/>
+
+    <label for="page_content">Custom Body:</label><br/>
+    <small>
+        Alternatively, a custom body for the entire release page can be provided.
+        When this is non-empty, it takes precedence over <i>content</i>.
+    </small><br/>
+    <textarea name="custom_body" rows="10" cols="100">{{release.release_page.custom_body|safe if release.release_page.custom_body else ''}}</textarea><br/>
+{% endif %}
+
+{% for ir in release.index_records %}
+    <label for="index_record_body">Index Record (<i>{{ir.date}}</i>):</label><br/>
+    <small>Enter the body of the index record in this field.</small><br/>
+    <textarea name="index_record_body__{{ir.id}}" rows="10" cols="100">{{ir.body|safe}}</textarea><br/>
+{% endfor %}
+
+    <input type="submit" value="Submit">
+    </form> 
+
+</body>
+</html>
