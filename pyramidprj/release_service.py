@@ -295,8 +295,9 @@ class ReleaseService:
             
         if release.release_page:
             dbsession.query(models.PlayerFile).filter(models.PlayerFile.release_page_id == release.release_page.id).delete()
-            dbsession.release_page.delete()
-        
+            dbsession.delete(release.release_page)
+
+        dbsession.delete(release)
 
 @cached(cache={}, key=lambda: "🕉")
 def get_release_service():
