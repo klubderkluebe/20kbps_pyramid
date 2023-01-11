@@ -14,6 +14,7 @@ requires = [
     'pyramid_jinja2',
     'pyramid_debugtoolbar',
     'waitress',
+    "psycopg2",
     'alembic',
     'pyramid_retry',
     'pyramid_tm',

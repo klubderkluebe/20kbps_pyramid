@@ -38,9 +38,9 @@ settings = get_current_registry().settings
 
 MUSIC_EXTENSIONS = ("mp3", "ogg", "opus",)
 IMAGE_EXTENSIONS = ("jpg", "png",)
-ARTIST_TAG = "TPE1"
-ALBUM_TAG = "TALB"
-TITLE_TAG = "TIT2"
+ARTIST_TAG = {".mp3": "TPE1", ".ogg": "ARTIST", ".opus": "ARTIST"}
+ALBUM_TAG = {".mp3": "TALB", ".ogg": "ALBUM", ".opus": "ALBUM"}
+TITLE_TAG = {".mp3": "TIT2", ".ogg": "TITLE", ".opus": "TITLE"}
 VARIOUS_ARTISTS_NAME = "VA"
 
 SANITIZE_ALPHABET = ".-_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
@@ -161,6 +161,21 @@ class ReleaseService:
         
         return local_dir
 
+    def _get_tag_value(self, tags: t.Mapping[str, t.Any], key: str) -> str:
+        v = tags[key]
+        if isinstance(v, list):
+            return v[0]
+        return str(v)
+
+    def _get_artist_tag(self, dotext: str, tags: t.Mapping[str, t.Any]) -> str:
+        return self._get_tag_value(tags, ARTIST_TAG[dotext])
+
+    def _get_title_tag(self, dotext: str, tags: t.Mapping[str, t.Any]) -> str:
+        return self._get_tag_value(tags, TITLE_TAG[dotext])
+
+    def _get_album_tag(self, dotext: str, tags: t.Mapping[str, t.Any]) -> str:
+        return self._get_tag_value(tags, ALBUM_TAG[dotext])
+
     def process_local_dir(self, file, local_dir):
         data = self.task_state[RequestType.PREVIEW, file].data = {
             "local_dir": local_dir,
@@ -182,21 +197,21 @@ class ReleaseService:
                 mf = mutagen.File(f)  # type: ignore
                 tags = mf.tags  # type: ignore
                 music_file = sanitize(os.path.basename(f))
+                _, dotext = os.path.splitext(music_file)
                 try:
                     validate_filename(music_file)
                 except:
                     # File name is too garbled. Just use number.
-                    _, dotext = os.path.splitext(music_file)
                     music_file = f"{i:02}{dotext}"
                 player_files.append({
-                    "_artist": str(tags[ARTIST_TAG]),
+                    "_artist": self._get_artist_tag(dotext, tags),
                     "file": music_file,
                     "number": i,
-                    "title": str(tags[TITLE_TAG]),
+                    "title": self._get_title_tag(dotext, tags),
                     "duration_secs": round(mf.info.length),  # type: ignore
                     "duration_hms": models.PlayerFile.show_duration(round(mf.info.length)),  # type: ignore
                 })
-                albums.add(str(tags[ALBUM_TAG]))
+                albums.add(self._get_album_tag(dotext, tags))
 
             assert len(albums) == 1, f"More than one album given in {ALBUM_TAG} tag"
             album = albums.pop()
@@ -337,8 +352,11 @@ class ReleaseService:
             .with_entities(models.IndexRecord.id)
         )
         index_record_ids = [ir.id for ir in q]
+
+        release.index_records = []
+        dbsession.flush()
         dbsession.query(models.IndexRecord).filter(models.IndexRecord.id.in_(index_record_ids)).delete()
-            
+
         if release.release_page:
             dbsession.query(models.PlayerFile).filter(models.PlayerFile.release_page_id == release.release_page.id).delete()
             dbsession.delete(release.release_page)
