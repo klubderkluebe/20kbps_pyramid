@@ -24,3 +24,4 @@ node_modules
 pyramidprj.code-workspace
 viztest/*.png
 secrets
+notes.txt
