@@ -88,31 +88,39 @@ class PlayerFile(Base):
     release_page_id = Column(Integer, ForeignKey("release_page.id"))
     release_page = relationship("ReleasePage", back_populates="player_files")
 
-    @property
-    def _duration_tuple(self):
-        if self.duration_secs is None:
-            return None
-
-        secs = t.cast(int, self.duration_secs)
+    @staticmethod
+    def _get_duration_tuple(secs: int) -> t.List[int]:
         h = secs // 3600
         m = (secs - 3600 * h) // 60
         s = secs - 3600 * h - 60 * m
         return [h, m, s]
 
-    @property
-    def duration_iso8601(self) -> str:
-        hms = self._duration_tuple
-        if hms is None:
-            return ""
-
+    @staticmethod
+    def show_duration_iso8601(secs: int) -> str:
+        hms = PlayerFile._get_duration_tuple(secs)
         ifst = 0 if hms[0] else 1
         return "PT" + "".join(f"{x}{c}" for x, c in zip(hms[ifst:], ["H", "M", "S"][ifst:]))
 
-    @property
-    def duration(self) -> str:
-        hms = self._duration_tuple
-        if hms is None:
-            return ""
-
+    @staticmethod
+    def show_duration(secs: int) -> str:
+        hms = PlayerFile._get_duration_tuple(secs)
         ifst = 0 if hms[0] else 1
         return ":".join(f"{x:02}" for x in hms[ifst:])
+
+    @property
+    def _duration_tuple(self):
+        if self.duration_secs is None:
+            return None
+        return PlayerFile._get_duration_tuple(t.cast(int, self.duration_secs))
+
+    @property
+    def duration_iso8601(self) -> str:
+        if self.duration_secs is None:
+            return ""
+        return PlayerFile.show_duration_iso8601(t.cast(int, self.duration_secs))
+
+    @property
+    def duration(self) -> str:
+        if self.duration_secs is None:
+            return ""
+        return PlayerFile.show_duration(t.cast(int, self.duration_secs))

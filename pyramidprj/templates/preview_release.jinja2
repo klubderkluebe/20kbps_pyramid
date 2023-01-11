@@ -5,13 +5,12 @@
     {% if success == false %}
         <p>There was an error creating the preview.</p>
         <pre>{{exception.__str__()}}</pre>
+        <p><a href="/create_release/">Back to <i>Create release</i></a></p>
     {% elif success is none %}
         <p>The preview is still pending. Reload this page after a little while.</p>
     {% else %}
-        <p>
-            Check the release data below. When o.k., press <i>Submit</i>.
-            This will
-        </p>
+        <p>Check the release data below. The preview does not include the cover image.</p>
+        <p>When o.k., press <i>Submit</i>. This will</p>
         <ul>
             <li>create the release (pseudo-)directory in static asset storage (under <i>Releases</i>), if not already present.</li>
             <li>copy the audio files and <i>cover.jpg</i> to static asset storage (prefix: <i>Releases/{{data.release_dir}}/</i>).</li>
@@ -19,6 +18,10 @@
                 <li>Existing files are overwritten.</li>
             </ul>
         </ul>
+        <p>
+            When not o.k., make changes, update the zip file, reupload it to static asset storage,
+            go <a href="/create_release/">back&nbsp;to&nbsp;<i>Create&nbsp;release</i></a>, and start over.
+        </p>
 
         <form method="POST" action="/request_upload/">
             <input type="hidden" name="file" value="{{data.file}}" />
@@ -36,7 +39,7 @@
         <h3>Track List</h3>
         <ol>
             {% for track in data.player_files %}
-            <li>{{ track.title }} ({{ track.duration_secs }} seconds)</li>
+            <li>{{ track.title }} ({{ track.duration_hms }})</li>
             {% endfor %}
         </ol>
         <p>Released on {{ data.release_data.date }}</p>

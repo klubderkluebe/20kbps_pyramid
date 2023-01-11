@@ -8,8 +8,14 @@
 {% endblock %}
 
 {% block content %}
-    <div style="display:block; text-align:right;">
-        <button onclick="uploadToArchiveOrg()">Upload to archive.org</button>
+
+    <div style="display:flex;justify-content:space-between">
+        <div>
+            <a href="/Releases/">Go to release list</a>
+        </div>
+        <div>
+            <button onclick="uploadToArchiveOrg()">Upload to archive.org</button>
+        </div>
     </div>
 
     <form method="post" action="/update_release/">

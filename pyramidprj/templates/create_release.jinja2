@@ -3,8 +3,91 @@
 
 {% block content %}
   <h1>Create release</h1>
+  <p>
+    The creation of a release begins with a zip file. This is the same file that the visitor will download,
+    and it must contain:
+  </p>
+  <ul>
+    <li>
+      <span>audio files with an extension of <i>.ogg</i>, <i>.opus</i>, or <i>.mp3</i></span>
+      <ul>
+        <li>Multi-format releases are not a problem.</li>
+      </ul>
+    </li>
+    <li>
+      <span>an image file named <i>cover.jpg</i></span>
+      <ul>
+        <li>Recommended dimensions are 800x800. Keep file size small, as this is the cover image that will be loaded on the release page.</li>
+      </ul>
+    </li>
+  </ul>
+  <p>
+    The audio files will be added to the release in the same lexicographic order in which the file system lists them, so
+    to all intents and purposes, in 'alphabetical order'.
+  </p>
+  <p>
+    <em>Every</em> audio file <em>must</em> be tagged with the following data (tag names given for each format):    
+  </p>
+  <table>
+    <tr>
+      <th><i>.ogg</i> or <i>.opus</i></th>
+      <th><i>.mp3</i> (ID3v2)</th>
+    </tr>
+    <tr>
+      <td>ARTIST</td>
+      <td>TPE1</td>
+    </tr>
+    <tr>
+      <td>TITLE</td>
+      <td>TIT2</td>
+    </tr>
+    <tr>
+      <td>ALBUM</td>
+      <td>TALB</td>
+    </tr>
+  </table>
+  <p>
+    The code that derives a release from the files looks for these exact tags, so substituting e.g.
+    ID3v2.2 <i>TAL</i> for ID3v2.4 <i>TALB</i> will not work.
+  </p>
+  <p>
+    When multiple artists are found, the derived release data will have <i>VA</i> in the <i>artist</i> field,
+    and that's what is displayed in the release page heading. Tracklists on VA release pages show the artist name for each track.
+  </p>
+  <p>
+    Validation enforces that the album name is consistent across all files.
+  </p>
+  <p>
+    The catalog number is derived from the name of the zip file, which should follow this format:
+  </p>
+  <p>
+    <span style="color:palevioletred">artist_name</span>_-_<span style="color:darkseagreen">album_name</span>-(<span style="color:darkslateblue">catalog_no</span>)-<span style="color:darkblue">year</span>.zip</pre>
+  </p>
+  <p>
+    E.g. <i>the_hardliner_-_suicide_bag_safely_locked_away-(20k240)-2013.zip</i>
+  </p>
+  <p>
+    Any string placed between the parentheses can be a catalog 'number'. It is perfectly acceptable to create a release
+    with a catalog number that does not follow the <i>20kxxx</i> format. You are in charge of putting the correct catalog
+    number there, as there is no validation, not even a uniqueness check.
+  </p>
+  <p>
+    So to start creating a release, upload a file which follows above rules to static asset storage. It must be
+    directly in the <i>Releases</i> directory. As of now, a GCP bucket named <i>20kbps-static</i> is used, so the command
+    to upload the file would be:
+  </p>
+  <p>
+    <span style="font-family:monospace">gsutil cp &lt;zip_file&gt; gs://20kbps-static/Releases/</span>
+    &#x2003;(Do not forget the trailing slash.)
+  </p>
+  <p>
+    Once uploaded, enter the file name (without <i>Releases/</i>) in below field and press <i>Submit</i>.
+    This will trigger download and extraction of the file, whereafter you will be able to see a preview
+    of the release data, and confirm whether you would like to proceed.
+  </p>
+  <p>&nbsp;</p>
   <form action="/request_preview/" method="post">
-    <label for="name">File (I will look for this file in the <i>Releases</i> directory in static asset storage):</label><br>
+    <label for="name"><b>File</b> (I will look for this file in the <i>Releases</i> directory in static asset storage):</label><br>
     <input type="text" id="file" name="file" style="width:100%"><br>
     <input type="submit" value="Submit">
   </form> 

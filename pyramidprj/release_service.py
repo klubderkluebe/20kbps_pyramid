@@ -46,7 +46,7 @@ VARIOUS_ARTISTS_NAME = "VA"
 SANITIZE_ALPHABET = ".-_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 SANITIZE_MAXLEN = 255
 
-ptn_catno = re.compile(r"\((.*?)\)$")
+ptn_catno = re.compile(r"\((.*?)\)-\d{4}$")
 ptn_tag = re.compile(r"[\dA-Z]{4}")
 
 
@@ -194,6 +194,7 @@ class ReleaseService:
                     "number": i,
                     "title": str(tags[TITLE_TAG]),
                     "duration_secs": round(mf.info.length),  # type: ignore
+                    "duration_hms": models.PlayerFile.show_duration(round(mf.info.length)),  # type: ignore
                 })
                 albums.add(str(tags[ALBUM_TAG]))
 
@@ -274,7 +275,10 @@ class ReleaseService:
         session.add(release)
         session.commit()
 
-        data["identifier"] = identifier
+        data.update({
+            "identifier": identifier,
+            "release_id": int(release.id),  # type: ignore
+        })
         self.task_state[RequestType.IA_UPLOAD, file].success = True
 
     def create_database_objects(self, dbsession, file, page_content, index_record_body):
@@ -288,6 +292,7 @@ class ReleaseService:
         )
         dbsession.add(release)
         dbsession.flush()
+        data["release_id"] = int(release.id)  # type: ignore
 
         rp = models.ReleasePage(
             release=release,

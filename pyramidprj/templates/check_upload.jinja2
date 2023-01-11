@@ -19,13 +19,23 @@
             and press <i>Submit</i> to create the database objects.
         </p>
         <p>
-            <b>The release will be public after this step.</b>
+            Both fields are HTML fields. <i>Release page content</i> is what will be displayed between cover image
+            and tracklist on the release page. <i>Index record body</i> is the body of the entry that will be shown
+            on <a href="/index2.htm"><i>index2.htm</i></a> for this release.
+        </p>
+        <p>
+            <b>The release will be public after this step.</b> There will be no further preview.
+            You will be able to edit release page content and index record body on this release's
+            edit page, which will be available after this step.
+        </p>
+        <p>
+            If you want to start over, go <a href="/create_release/">back to <i>Create release</i></a>.
         </p>
         <form method="POST" action="/commit_release/">
             <input type="hidden" name="file" value="{{data.file}}" />
-            <label for="page_content">Release Page Content:</label><br/>
+            <label for="page_content">Release page content:</label><br/>
             <textarea name="page_content" rows="10" cols="100"></textarea><br/>
-            <label for="index_record_body">Index Record Body:</label><br/>
+            <label for="index_record_body">Index record body:</label><br/>
             <textarea name="index_record_body" rows="10" cols="100">{{data.release_data.description}} (<a href="/Releases/{{data.release_dir}}/">release page</a>) (<a href="/Releases/{{data.file}}">zip</a>)</textarea>
             <br/><br/>
             <input type="submit" value="Submit">            
