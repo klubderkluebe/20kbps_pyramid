@@ -1,10 +1,7 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Check upload</title>
-</head>
-<body>
+{% extends 'layout.jinja2' %}
+{% block title %}Check upload{% endblock %}
 
+{% block content %}
     {% if success == false %}
         <p>There was an error uploading the files.</p>
         <pre>{{exception.__str__()}}</pre>
@@ -34,8 +31,4 @@
             <input type="submit" value="Submit">            
         </form>
     {% endif %}
-
-</body>
-</html>
-
-
+{% endblock %}

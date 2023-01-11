@@ -1,14 +1,11 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Create release</title>
-</head>
-<body>
+{% extends 'layout.jinja2' %}
+{% block title %}Create release{% endblock %}
+
+{% block content %}
   <h1>Create release</h1>
   <form action="/request_preview/" method="post">
     <label for="name">File (I will look for this file in the <i>Releases</i> directory in static asset storage):</label><br>
-    <input type="text" id="file" name="file"><br>
+    <input type="text" id="file" name="file" style="width:100%"><br>
     <input type="submit" value="Submit">
   </form> 
-</body>
-</html>
+{% endblock %}

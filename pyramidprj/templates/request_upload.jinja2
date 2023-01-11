@@ -1,12 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Request upload</title>
-</head>
-<body>
+{% extends 'layout.jinja2' %}
+{% block title %}Request upload{% endblock %}
+
+{% block content %}
   {% with check_url = '/check_upload/' + file + '/' %}
     <p>Upload for <i>{{file}}</i> has been requested.</p>
     <p>Go to <a href="{{check_url}}">{{check_url}}</a> to check upload state and commit the release.</p>
   {% endwith %}
-</body>
-</html>
+{% endblock %}

@@ -1,14 +1,22 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Release list</title>
-  <style>
-    .row:hover {
-      background-color: palegreen;
-    }
-  </style>
-</head>
-<body>
+{% extends 'layout.jinja2' %}
+{% block title %}Release list{% endblock %}
+
+{% block head %}
+<style>
+  td {vertical-align: middle;}
+  td:nth-child(1) {width: 80px;}  /* catalog_no */
+  td:nth-child(3) {width: 50px;}  /* Edit */
+  td:nth-child(4) {width: 110px; padding-top: 9px; padding-bottom: 3px;}  /* Delete */
+
+  button {height: 32px; padding: 5px 30px;}
+
+  .row:hover {
+    background-color: palegreen;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
   <table>
   {% for r in releases %}
     <tr class="row">
@@ -46,5 +54,4 @@
       }      
     }
   </script>
-</body>
-</html>
+{% endblock %}

@@ -1,10 +1,7 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Check archive.org upload</title>
-</head>
-<body>
+{% extends 'layout.jinja2' %}
+{% block title %}Check archive.org upload{% endblock %}
 
+{% block content %}
     {% if success == false %}
         <p>There was an error uploading the files.</p>
         <pre>{{exception.__str__()}}</pre>
@@ -12,10 +9,10 @@
         <p>The archive.org upload is in progress. Reload this page after a little while.</p>
     {% else %}
         {% with 
-            item_url = 'https://archive.org/details/' + data.identifier
+            item_url = 'https://archive.org/details/' + data.identifier,
             hist_url = 'https://catalogd.archive.org/history/' + data.identifier
         %}
-            <p>The upload has succeeded.</p>
+            <p>The upload has succeeded. The archive.org URL has been added to the release data.</p>
             <p>The item will be available at <a href="{{item_url}}">{{item_url}}</a>.</p>
             <p>
                 It can take a little while for the item to become available.
@@ -23,6 +20,4 @@
             </p>
         {% endwith %}
     {% endif %}
-
-</body>
-</html>
+{% endblock %}

@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Preview release</title>
-</head>
-<body>
+{% extends 'layout.jinja2' %}
+{% block title %}Preview release{% endblock %}
+
+{% block content %}
     {% if success == false %}
         <p>There was an error creating the preview.</p>
         <pre>{{exception.__str__()}}</pre>
@@ -43,5 +41,4 @@
         </ol>
         <p>Released on {{ data.release_data.date }}</p>
     {% endif %}
-</body>
-</html>
+{% endblock %}
