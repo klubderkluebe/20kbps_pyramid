@@ -9,6 +9,7 @@ with open(os.path.join(here, 'CHANGES.txt')) as f:
     CHANGES = f.read()
 
 requires = [
+    "python-dateutil",
     'plaster_pastedeploy',
     'pyramid',
     'pyramid_jinja2',
