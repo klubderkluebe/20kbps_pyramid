@@ -36,6 +36,11 @@ class IndexRecord(Base):
 
     releases = relationship("Release", secondary=index_record_releases, back_populates="index_records")
 
+    @property
+    def body_text(self):
+        html = t.cast(str, self.body)
+        return BeautifulSoup(html, "html5lib").text
+
 
 class Release(Base):
     __tablename__ = 'release'
@@ -73,8 +78,7 @@ class ReleasePage(Base):
     @property
     def content_text(self):
         html = t.cast(str, self.custom_body or self.content)
-        soup = BeautifulSoup(html, "html5lib")
-        return soup.text
+        return BeautifulSoup(html, "html5lib").text
 
 
 class PlayerFile(Base):

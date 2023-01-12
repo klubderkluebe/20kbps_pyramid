@@ -80,12 +80,11 @@
     <span style="font-family:monospace">gsutil cp &lt;zip_file&gt; gs://20kbps-static/Releases/</span>
     &#x2003;(Do not forget the trailing slash.)
   </p>
-  <p>
+  <p style="padding-bottom:1rem;">
     Once uploaded, enter the file name (without <i>Releases/</i>) in below field and press <i>Submit</i>.
     This will trigger download and extraction of the file, whereafter you will be able to see a preview
     of the release data, and confirm whether you would like to proceed.
   </p>
-  <p>&nbsp;</p>
   <form action="/request_preview/" method="post">
     <label for="name"><b>File</b> (I will look for this file in the <i>Releases</i> directory in static asset storage):</label><br>
     <input type="text" id="file" name="file" style="width:100%"><br>

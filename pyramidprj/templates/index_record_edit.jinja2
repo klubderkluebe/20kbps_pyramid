@@ -1,0 +1,32 @@
+{% extends 'layout.jinja2' %}
+{% block title %}Index record edit{% endblock %}
+
+{% block content %}
+  <div style="padding-bottom: 1rem;">
+      <a href="/index_records/">Go to index record list</a>      
+  </div>
+
+  {% if index_record.releases %}
+    <p>
+      This index record is associated with release(s):
+    </p>
+    <ul>
+    {% for r in index_record.releases %}
+      <li><a href="/Releases/{{r.release_dir}}/">{{r.catalog_no}}</a></li>
+    {% endfor %}
+    </ul>
+    <p style="padding-bottom: 1rem">
+      The associations will remain unchanged, even when references to the releases
+      are removed from the index record body. The only way to remove these associations
+      is to interact with the database directly.
+    </p>
+  {% endif %}
+  <form method="POST" action="/upsert_index_record/">
+    <input type="hidden" name="index_record_id" value="{{index_record.id}}" />
+    <label for="date">Date:</label><br/>
+    <input type="text" name="date" value="{{index_record.date}}" />
+    <label for="body">Body:</label><br/>
+    <textarea name="body">{{index_record.body|safe}}</textarea>
+    <input type="submit" value="Submit" />
+  </form>
+{% endblock %}

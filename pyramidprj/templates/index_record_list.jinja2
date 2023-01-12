@@ -1,0 +1,80 @@
+{% extends 'layout.jinja2' %}
+{% block title %}Index record list{% endblock %}
+
+{% block head %}
+<style>
+  td {vertical-align: middle;}
+  td:nth-child(1) {width: 100px; height: 50px;}  /* date */
+  td:nth-child(2) {  /* body */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;    
+  }
+  td:nth-child(3) {width: 80px;}  /* associated catalog_nos */
+  td:nth-child(4) {width: 50px;}  /* Edit */
+  td:nth-child(5) {width: 110px; padding-top: 9px; padding-bottom: 3px;}  /* Delete */
+
+  button {height: 32px; padding: 5px 30px;}
+
+  .row:hover {
+    background-color: palegreen;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+  <p style="padding-bottom:1rem">
+    <a href="/create_index_record/">Create a new index record</a>
+  </p>
+  <p>
+    Only index records that are not associated with any release can be deleted.
+  </p>
+  <p>
+    The <i>Create a new index record</i> feature was added in order to be able to create
+    index records independently from releases, for general announcements and such.
+  </p>
+  <table>
+{% for ir in index_records %}
+    <tr class="row">
+      <td>{{ir.date}}</td>
+      <td>{{ir.body_text}}</td>
+      <td>
+        {% if ir.releases %}
+          <a href="/Releases/{{ir.releases[0].release_dir}}/">{{ir.releases[0].catalog_no}}</a>
+        {% endif %}
+        {% for r in ir.releases[1:] %}
+          <br/>
+          <a href="/Releases/{{r.release_dir}}/">{{r.catalog_no}}</a>
+        {% endfor %}
+      </td>
+      <td><a href="/edit_index_record/{{ir.id}}/">Edit</a></td>
+      <td>
+        {% if not ir.releases %}
+          <button onclick="deleteIndexRecord({{ir.id}}, '{{ir.date}}')">Delete</button>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </table>
+  <script>
+    async function deleteIndexRecord(id, date) {
+      const sure = confirm(`Delete index record ${id} (${date}). Are you sure?`)
+      if (sure) {
+        const res = await fetch(
+          `/index_records/${id}/`,
+          {
+            method: 'DELETE',
+            headers: {
+              'Authorization': '{{authorization}}',
+            }
+          }
+        )
+        if (res.status === 204) {
+          location.reload()
+        } else {
+          alert(`Error deleting index record ${id} (${date}) (${res.status} ${res.statusText})`)
+        }
+      }      
+    }
+  </script>
+{% endblock %}

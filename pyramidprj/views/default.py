@@ -1,5 +1,6 @@
 import json
 import os.path
+from datetime import date
 
 import pyramid.httpexceptions as exc
 from pyramid.renderers import render_to_response
@@ -215,7 +216,7 @@ def release_edit(request):
     }
 
 
-@view_config(route_name="update_release", request_method="POST", renderer="pyramidprj:templates/update_release.jinja2", permission="🕉")
+@view_config(route_name="update_release", request_method="POST", permission="🕉")
 def update_release(request):
     release_id = int(request.POST["release_id"])
     release_data = json.loads(request.POST["release_data"]) if request.POST["release_data"] else None
@@ -237,6 +238,53 @@ def update_release(request):
             ir.body = body
 
     return exc.HTTPTemporaryRedirect(f"/edit/{release_id}/")
+
+
+@view_config(route_name="index_record_list", renderer="pyramidprj:templates/index_record_list.jinja2", permission="🕉")
+def index_record_list(request):
+    index_records = request.dbsession.query(models.IndexRecord).order_by(models.IndexRecord.id.desc())
+    return {
+        "index_records": index_records,
+        "authorization": request.headers["Authorization"],
+    }
+
+
+@view_config(route_name="delete_index_record", request_method="DELETE", permission="🕉")
+def delete_index_record(request):
+    ir_id = int(request.matchdict["index_record_id"])
+    request.dbsession.query(models.IndexRecord).filter(models.IndexRecord.id == ir_id).delete()
+    return exc.HTTPNoContent()
+
+
+@view_config(route_name="index_record_edit", renderer="pyramidprj:templates/index_record_edit.jinja2", permission="🕉")
+def index_record_edit(request):
+    ir_id = int(request.matchdict["index_record_id"])
+    index_record = request.dbsession.query(models.IndexRecord).filter(models.IndexRecord.id == ir_id).one()    
+    return {
+        "index_record": index_record,
+    }
+
+
+@view_config(route_name="upsert_index_record", request_method="POST", permission="🕉")
+def upsert_index_record(request):
+    ir_id = int(request.POST["index_record_id"])
+    if ir_id == -1:
+        ir = models.IndexRecord()
+        request.dbsession.add(ir)
+    else:
+        ir = request.dbsession.query(models.IndexRecord).filter(models.IndexRecord.id == ir_id).one()
+    ir.date = request.POST["date"]
+    ir.body = request.POST["body"]
+    if ir_id == -1:
+        request.dbsession.flush()
+    return exc.HTTPTemporaryRedirect(f"/edit_index_record/{ir.id}/")
+
+
+@view_config(route_name="index_record_create", renderer="pyramidprj:templates/index_record_create.jinja2", permission="🕉")
+def index_record_create(request):
+    return {
+        "date_prefill": date.today().strftime("%d. %b %y"),
+    }
 
 
 db_err_msg = """\

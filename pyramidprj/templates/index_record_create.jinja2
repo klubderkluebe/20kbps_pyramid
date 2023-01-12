@@ -1,0 +1,20 @@
+{% extends 'layout.jinja2' %}
+{% block title %}Index record create{% endblock %}
+
+{% block content %}
+  <div style="padding-bottom: 1rem;">
+      <a href="/index_records/">Go to index record list</a>      
+  </div>
+  <p>
+    The <i>Create a new index record</i> feature was added in order to be able to create
+    index records independently from releases, for general announcements and such.
+  </p>
+  <form method="POST" action="/upsert_index_record/">
+    <input type="hidden" name="index_record_id" value="-1" />
+    <label for="date">Date:</label><br/>
+    <input type="text" name="date" value="{{date_prefill}}" />
+    <label for="body">Body:</label><br/>
+    <textarea name="body"></textarea>
+    <input type="submit" value="Submit" />
+  </form>
+{% endblock %}

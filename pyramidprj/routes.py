@@ -18,3 +18,9 @@ def includeme(config):
     config.add_route("Release_list", "/Releases/")
     config.add_route("release_edit", "/edit/{release_id}/")
     config.add_route("update_release", "/update_release/")
+
+    config.add_route("index_record_list", "/index_records/")
+    config.add_route("delete_index_record", "/index_records/{index_record_id}/")
+    config.add_route("index_record_edit", "/edit_index_record/{index_record_id}/")
+    config.add_route("upsert_index_record", "/upsert_index_record/")
+    config.add_route("index_record_create", "/create_index_record/")
