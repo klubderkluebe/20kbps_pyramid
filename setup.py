@@ -30,6 +30,7 @@ requires = [
     "html5lib",
     "requests",
     "pathvalidate",
+    "protobuf==4.21.12",
     "google-cloud-core==2.3.1",
     "google-cloud-storage",
     "pyramid_nacl_session",
