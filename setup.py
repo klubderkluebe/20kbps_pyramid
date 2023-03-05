@@ -9,6 +9,7 @@ with open(os.path.join(here, 'CHANGES.txt')) as f:
     CHANGES = f.read()
 
 requires = [
+    "urllib3==1.26.14",
     "python-dateutil",
     'plaster_pastedeploy',
     'pyramid',
