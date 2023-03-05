@@ -30,6 +30,7 @@ requires = [
     "html5lib",
     "requests",
     "pathvalidate",
+    "google-cloud-core==2.3.1",
     "google-cloud-storage",
     "pyramid_nacl_session",
     "internetarchive",
