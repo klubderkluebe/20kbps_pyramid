@@ -20,7 +20,7 @@ requires = [
     'alembic',
     'pyramid_retry',
     'pyramid_tm',
-    'SQLAlchemy',
+    'SQLAlchemy==1.4.46',
     'transaction',
     'zope.sqlalchemy',
     "beautifulsoup4",
