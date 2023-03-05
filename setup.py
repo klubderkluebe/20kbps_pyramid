@@ -30,6 +30,7 @@ requires = [
     "html5lib==1.1",
     "requests==2.28.1",
     "pathvalidate==2.5.2",
+    "google==3.0.0",
     "protobuf==4.21.12",
     "googleapis-common-protos==1.57.1",
     "google-api-core==2.11.0",
