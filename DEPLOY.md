@@ -95,7 +95,6 @@ Inside the *20kbps_pyramid* directory, run setup. Make sure this is done using t
 ```shell
 python setup.py install
 ```
-    "googleapis-common-protos==1.57.1",
 
 Due to a stupid bug, it is necessary to apply this fix:
 ```shell
