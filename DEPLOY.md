@@ -105,10 +105,7 @@ pip install google==3.0.0 google-auth==2.15.0 google-cloud==0.34.0 protobuf==4.2
 cd ~/.pyenv/versions/3.10.4/lib/python3.10/site-packages/google
 touch __init__.py
 ```
-Without this, the following error would be encountered later:
-```
-ModuleNotFoundError: No module named 'google.protobuf'
-```
+Without this, `ModuleNotFoundError` exceptions would be thrown later on.
 
 ### Set up temp directory and secrets
 
@@ -167,7 +164,7 @@ In *user*'s home directory, clone into *20kbps* in order to have legacy files av
 git clone git@github.com:klubderkluebe/20kbps.git
 ```
 
-Even though the packages are installed by *setup.py*, it is necessary to issue the *pip* command again in order to create the shims. (Make sure the versions match the ones that are already installed.)
+Even though the packages are installed by *setup.py*, it is necessary to issue the *pip* command in order to create the shims. (Make sure the versions match the ones that are already installed.)
 ```shell
 pip install alembic==1.9.1 pyramid==2.0
 ```
