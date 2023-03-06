@@ -17,7 +17,7 @@ Enable `gcloud` to use the same service account credentials which are used by th
 gcloud auth activate-service-account --key-file=/home/<user>/20kbps_pyramid/secrets/gcloud_service_account.json
 ```
 
-Create `~/.local/bin/backup_20kbps.sh with this content:
+Create `~/.local/bin/backup_20kbps.sh` with this content:
 ```shell
 #!/usr/bin/bash
 FILE=/tmp/pyramidprj/20kbps-`date +%Y-%m-%d`.pg.sql
