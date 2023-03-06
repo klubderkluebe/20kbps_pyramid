@@ -201,6 +201,11 @@ cd ~/20kbps_pyramid
 pserve production.ini
 ```
 
+Make it executable:
+```shell
+chmod +x ~/.local/bin/pserve.sh
+```
+
 As root, create `/lib/systemd/system/pserve.service` with this content. (Make sure to substitute *user* and *user*'s group for `<user>` and `<group>`.)
 ```shell
 [Unit]
