@@ -279,7 +279,7 @@ class ReleaseService:
             engine = engine_from_config(settings, prefix='sqlalchemy.')
             session = sessionmaker(bind=engine)()
             release = session.query(models.Release).filter(models.Release.file == file).one()
-            identifier = ArchiveOrgClient().upload_release(release, local_dir, True)  # TODO: remove use_uuid=True
+            identifier = ArchiveOrgClient().upload_release(release, local_dir)
         except Exception as ex:
             self.task_state[RequestType.IA_UPLOAD, file].success = False
             self.task_state[RequestType.IA_UPLOAD, file].exception = ex
