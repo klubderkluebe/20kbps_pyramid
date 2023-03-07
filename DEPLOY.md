@@ -96,6 +96,8 @@ Inside the *20kbps_pyramid* directory, run setup. Make sure this is done using t
 python setup.py install
 ```
 
+`setup.py install` actually needs to be run every time a change is pulled, as the app is executed from an egg inside `site-packages`, not from the repo directory.
+
 Due to a stupid bug, it is necessary to apply this fix:
 ```shell
 pip uninstall -y protobuf googleapis-common-protos google-api-core google-cloud-core google-cloud-storage

@@ -2,12 +2,6 @@ import os
 
 from setuptools import setup, find_packages
 
-here = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(here, 'README.txt')) as f:
-    README = f.read()
-with open(os.path.join(here, 'CHANGES.txt')) as f:
-    CHANGES = f.read()
-
 requires = [
     "urllib3==1.26.11",
     "python-dateutil==2.8.2",
@@ -50,7 +44,7 @@ setup(
     name='pyramidprj',
     version='0.0',
     description='pyramidprj',
-    long_description=README + '\n\n' + CHANGES,
+    long_description="20kbps netlabel app",
     classifiers=[
         'Programming Language :: Python',
         'Framework :: Pyramid',
