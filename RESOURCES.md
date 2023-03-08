@@ -42,6 +42,9 @@ The netlabel's Discogs account is https://www.discogs.com/user/20kbps.
 
 ## Credentials
 
+### 20kbps admin interface
+
+To access the admin part of 20kbps, the HTTP Basic Auth username and password are needed. These are stored in plaintext in `secrets/basic_auth.json`. (See also the [deploy doc](DEPLOY.md) about this.)
 
 ### GCP
 
