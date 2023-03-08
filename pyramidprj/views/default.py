@@ -74,7 +74,7 @@ def request_preview(request):
     release_service = get_release_service()
     task_state = release_service.task_state.get(key)
     if task_state and task_state.success is None:
-        raise exc.HTTPBadRequest("Preview task for '{file}' is already running")
+        raise exc.HTTPBadRequest(f"Preview task for '{file}' is already running")
 
     if task_state:
         del release_service.task_state[key]
