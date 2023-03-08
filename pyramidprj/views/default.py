@@ -1,5 +1,6 @@
 import json
 import os.path
+import re
 from datetime import date
 
 import pyramid.httpexceptions as exc
@@ -71,6 +72,11 @@ def request_preview(request):
     file = request.POST['file']
     key = (RequestType.PREVIEW, file)
 
+    m = re.search(r"(?:(?!_-_)[^\s])*_-_.*-\(([\w-]+)\)-\d{4}\.zip", file)
+    if not m:
+        raise exc.HTTPBadRequest("Filename given does not match pattern artist_name_-_album_name-(catalog_no)-year.zip")
+    file = m[0]
+    
     release_service = get_release_service()
     task_state = release_service.task_state.get(key)
     if task_state and task_state.success is None:

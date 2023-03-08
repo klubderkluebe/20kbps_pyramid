@@ -47,7 +47,6 @@ SANITIZE_ALPHABET = ".-_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrst
 SANITIZE_MAXLEN = 255
 
 ptn_catno = re.compile(r"\((.*?)\)-\d{4}$")
-ptn_tag = re.compile(r"[\dA-Z]{4}")
 
 
 def sanitize(s):
