@@ -6,7 +6,7 @@ Resources and credentials are named in terms of what is needed in order to fulfi
 
 ### GCP (Google Cloud Platform)
 
-The netlabel runs on a *Compute Engine* instance in the project with ID *kbps-20*. (The name of the project is *20kbps*, and the ID is *kbps-20*.)
+The netlabel runs on a *Compute Engine* instance in the project with ID *kbps-20*. (The name of the project is *20kbps*, and the ID of the project is *kbps-20*.)
 
 With a few exceptions (which are in the app's *static* directory), static assets are in a storage bucket named *20kbps-static* in the same project as the instance. Most importantly, releases (i.e. release directories with individual files, as well as zip archives) are stored here. This bucket is publicly accessible. Files are served directly from it.
 
@@ -45,7 +45,7 @@ The netlabel's Discogs account is https://www.discogs.com/user/20kbps.
 
 ### GCP
 
-- Owner-level access to project *20kbps*
+- Owner-level access to project *kbps-20*
     - by having the password and TOTP key for account `jonas.santoso@gmail.com`
     - or by being given this access level
 - Credentials for service account `programmatic-release-managemen@kbps-20.iam.gserviceaccount.com`
