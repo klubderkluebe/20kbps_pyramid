@@ -1,3 +1,11 @@
+"""Initialize database from legacy data.
+
+This script is invoked by [`bootstrap_db.sh`](../../bootstrap_db.sh). Its purpose is to parse the legacy 20kbps
+documents and translate them to 20kbps_pyramid database rows for all releases up to and including 20k372.
+
+Because of many inconsistencies and quirks in the legacy data, this script is inevitably convoluted. Since its
+use is/was only as a once-off for migrating the legacy netlabel, it isn't further documented.
+"""
 import argparse
 import glob
 import os.path
