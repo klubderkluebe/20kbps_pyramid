@@ -146,6 +146,8 @@ Copy the secrets into *secrets*. The following files should be there:
 
 ### Bootstrap database
 
+**Boostrapping is/was of course only necessary for initializing the database from legacy data. To deploy a recent state, grab a [database dump](BACKUPS.md) and use `pg_restore`.**
+
 Set password for user *postgres* to *postgres*. As root:
 ```shell
 passwd postgres
