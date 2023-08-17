@@ -1,3 +1,5 @@
+"""Client for automated submission of new releases to archive.org.
+"""
 import glob
 import json
 import typing as t
@@ -35,6 +37,8 @@ class ArchiveOrgClient:
         }
         
     def release_metadata(self, r: "Release") -> dict:
+        """Generate archive.org-specific metadata from 20kbps_pyramid `Release` row.
+        """
         md = copy(self.md_template)
         md.update({
             "creator": r.release_data["artist"],  # type: ignore (new releases always have release_data)
@@ -45,6 +49,14 @@ class ArchiveOrgClient:
         return md
 
     def upload_release(self, r: "Release", local_dir: str, use_uuid: bool = False):
+        """Submit release to archive.org.
+
+        :param local_dir: Directory containing audio files and cover. When invoked from `ReleaseService`,
+            this is the temp directory where the release zip file was extracted.
+
+        :param use_uuid: When `True`, the archive.org identifier is set to a UUID. This is for testing
+            purposes and is always `False` in production in order to use the catalog number.
+        """
         files = glob.glob(f"{local_dir}/*")
         md = self.release_metadata(r)
         identifier = (
