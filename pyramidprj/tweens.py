@@ -1,3 +1,16 @@
+"""This file contains middlewares that are installed in Pyramid's request/response pipelines.
+
+resolve_release (request middleware):
+    Check each request for a URL that points to a release page. When it is a release page URL,
+    look up the `Release` object in the database by `release_dir` and attach it to the request.
+
+    
+rewrite_links (response middleware):
+    The index page as well as some release pages contain links with URLs that aren't valid anymore with
+    20kbps_pyramid. These links are rewritten to point to the correct resources. Doing this on-the-fly was a
+    design choice that was made in order to preserve legacy documents in their original state, while still
+    allowing for them to be patched as needed.
+"""
 from urllib.parse import unquote, urlparse, urlunparse
 
 from bs4 import BeautifulSoup
