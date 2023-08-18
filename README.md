@@ -18,3 +18,10 @@ I made it a point to make the underlying change of engine completely transparent
 [Deployment](DEPLOY.md) ― deployment instructions, should it ever become necessary to re-deploy *20kbps_pyramid*. No build/deploy automation, as this is a once in a lifetime job.
 
 [Backups](BACKUPS.md) ― description of what automated backups exist
+
+## Code Pointers
+
+These are good entry points for getting an overview of the code.
+
+- [ReleaseService](pyramidprj/release_service.py#L91) ― probably the core of the admin part of *20kbps_pyramid*
+- [Models](pyramidprj/models/models.py)
