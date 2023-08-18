@@ -89,6 +89,14 @@ class TaskState:
 
 
 class ReleaseService:
+    """The ReleaseService internally runs a task queue in a worker thread.
+    The task queue processes a release along the pipeline, from downloading the release zip file from
+    cloud storage to submitting a release to archive.org.
+    Admin views enqueue tasks using ReleaseService's `request_*` methods.
+    Additional synchronous methods are provided and are invoked by views to finalize a processed release by
+    inserting rows for it into the database (`create_database_objects`), and to delete a release
+    (`delete_database_objects`).
+    """
     def __init__(self):
         self.queue: deque[QueuedRequest] = deque()
         self.task_state: t.Dict[t.Tuple[RequestType, str], TaskState] = {}
@@ -96,6 +104,8 @@ class ReleaseService:
         self.thread.start()
 
     def thread_fn(self):
+        """Worker thread function. Pop requests from the queue and process them.
+        """
         if not getattr(self, "last", None):
             self.last = time.time()
         while True:            
@@ -122,16 +132,52 @@ class ReleaseService:
                             self.upload_to_ia(file, local_dir)
 
     def request_preview(self, file: str):
+        """Request release preview. The admin interface invokes this when a release zip file name is submitted
+        as the first step in creating the release.
+
+        The zip file is then downloaded from cloud storage and extracted into a temp directory. The files inside
+        the temp directory are processed to generate a preview.
+
+        :param file: Release zip file name. This file is expected to exist inside the `Releases` directory
+            in cloud storage.
+        """
         self.queue.append(QueuedRequest(RequestType.PREVIEW, file))
 
     def request_upload(self, file: str):
+        """Request upload of the release's individual files to the release directory. The admin interface
+        invokes this when proceeding from the preview step.
+
+        The individual files that were extracted into a temp directory for generating the preview are now
+        uploaded into the release directory in cloud storage. (The release directory is implicitly created
+        if not present.) The release directory is publicly accessible and is the location from where the
+        release page is served.
+
+        :param file: Release zip file name
+        """
         preview_state = self.task_state[RequestType.PREVIEW, file]
         self.queue.append(QueuedRequest(RequestType.UPLOAD, data=preview_state.data))
 
     def request_ia_upload(self, file: str):
+        """Request submission of a release to archive.org. The admin interface invokes this when the
+        `Upload to archive.org` button is clicked on the release edit page.
+
+        :param file: Release zip file name
+        """
         self.queue.append(QueuedRequest(RequestType.IA_UPLOAD, file))
 
     def process_zip_file(self, file, reuse_existing=False):
+        """Download release zip file from cloud storage and extract it into temp directory.
+
+        INTERNAL. Invoked by `ReleaseService` itself when processing a `PREVIEW` request.
+
+        :param file: Release zip file name. This file is expected to exist inside the `Releases` directory
+            in cloud storage.
+
+        :param reuse_existing: When `True`, and a matching temp directory is found, the existing temp directory
+            is reused instead of downloading and extracting the zip file again. This is only set to `True`
+            in the archive.org upload step. In the preview phase, the zip file is expected to be re-downloaded
+            in order to reflect any changes that are made to it.
+        """
         tmpdir = settings["tmp_directory"]
         local_dir = os.path.join(tmpdir, file.replace(".zip", ""))
 
@@ -176,6 +222,31 @@ class ReleaseService:
         return self._get_tag_value(tags, ALBUM_TAG[dotext])
 
     def process_local_dir(self, file, local_dir):
+        """Extract release data from the release's individual files.
+
+        INTERNAL. Invoked by `ReleaseService` itself when processing a `PREVIEW` request.
+
+        Audio file tags (ID3 for .mp3, Vorbis comment for both .ogg and .opus files) are read in order to
+        gather:
+          - artist and album
+          - title of each track
+
+        If the album name is non-unique across audio files, an error is thrown.
+
+        If the artist name is non-unique across audio files, the `VARIOUS_ARTISTS_NAME` constant (= 'VA') is
+        used as the release's artist name.
+
+        Duration of each track is also extracted from the file itself.
+
+        The lexicographic order of audio file names inside the temp directory is assumed to reflect the desired
+        track numbering, so audio files should be given as:
+            01-<remainder_of_name>.opus
+            02-<remainder_of_name>.opus
+            ...and so on.
+
+        :param file: Release zip file name
+        :param local_dir: Temp directory into which release zip was extracted
+        """
         data = self.task_state[RequestType.PREVIEW, file].data = {
             "local_dir": local_dir,
             "catalog_no": ptn_catno.search(local_dir).groups()[0],  # type: ignore
@@ -247,6 +318,12 @@ class ReleaseService:
         return data
 
     def upload_player_files(self, file):
+        """Upload a release's individual files (audio and cover) to the publicly accessible release directory.
+
+        INTERNAL. Invoked by `ReleaseService` itself when processing an `UPLOAD` request.        
+
+        :param file: Release zip file name
+        """
         data = self.task_state[RequestType.UPLOAD, file].data
         data["completed_uploads"] = []
 
@@ -272,6 +349,16 @@ class ReleaseService:
         self.task_state[RequestType.UPLOAD, file].success = True
 
     def upload_to_ia(self, file, local_dir):
+        """Submit a release to archive.org.
+
+        INTERNAL. Invoked by `ReleaseService` itself when processing an `IA_UPLOAD` request.        
+        
+        Archive.org submission is handled by [ArchiveOrgClient](archive_org_client.py) and involves generating
+        archive.org-specific metadata from the release data, and uploading the individual files.
+
+        :param file: Release zip file name
+        :param local_dir: Temp directory into which release zip was extracted
+        """
         data = self.task_state[RequestType.IA_UPLOAD, file].data
 
         try:
@@ -296,6 +383,16 @@ class ReleaseService:
         self.task_state[RequestType.IA_UPLOAD, file].success = True
 
     def create_database_objects(self, dbsession, file, page_content, index_record_body):
+        """Synchronously insert the rows representing a release into the database.
+
+        This is invoked by the `commit_release` view when user confirms the release should go live after the
+        individual files have been uploaded to the release directory.
+
+        :param dbsession: The view passes the request's database session.
+        :param file: Release zip file name
+        :param page_content: The view passes the release page content as entered by the user.
+        :param index_record_body: The view passes the content of the index page entry as entered by the user.
+        """
         data = self.task_state[RequestType.UPLOAD, file].data
 
         release = models.Release(
@@ -337,6 +434,14 @@ class ReleaseService:
         dbsession.add(ir)
 
     def delete_database_objects(self, dbsession, release_id):
+        """Synchronously delete the rows representing a release from the database.
+
+        This is invoked by the `delete_release` view when user clicks the `Delete` button on a row in the
+        release list view.
+
+        :param dbsession: The view passes the request's database session.
+        :param release_id: Primary key of release in database
+        """
         release = dbsession.query(models.Release).filter(models.Release.id == release_id).one()
 
         # An index record can be associated with multiple releases. This won't be the case for new
