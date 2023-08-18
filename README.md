@@ -25,3 +25,7 @@ These are good entry points for getting an overview of the code.
 
 - [ReleaseService](pyramidprj/release_service.py#L91) ― probably the core of the admin part of *20kbps_pyramid*
 - [Models](pyramidprj/models/models.py)
+
+## Video
+
+Watch a video showing how a release is published: [publishing_a_release.mp4](https://storage.googleapis.com/20kbps-static/assets/publishing_a_release.mp4)
